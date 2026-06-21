@@ -1,17 +1,94 @@
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
+@import "tailwindcss";
 
-  100% {
-    transform: translateX(-50%);
+@theme inline {
+  --font-sans: var(--font-inter);
+  --color-primary: #6366F1;
+  --color-dark: #050816;
+  --color-card: #0A0D1A;
+  --color-secondary-text: #9CA3AF;
+  --color-muted: #6B7280;
+  --color-border: #1F2937;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-marquee {
-  animation: marquee 40s linear infinite;
+@keyframes orbit-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-marquee-reverse {
-  animation: marquee 40s linear infinite reverse;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s ease-out forwards;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fade-up 0.7s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fade-up 0.7s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fade-up 0.7s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-4 {
+  animation: fade-up 0.7s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.animate-orbit {
+  animation: orbit-rotate 30s linear infinite;
+}
+
+.animate-orbit-reverse {
+  animation: orbit-rotate 40s linear infinite reverse;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 4s ease-in-out 2s infinite;
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 45s linear infinite;
 }

@@ -14,7 +14,7 @@ export default function SignInButton() {
         </span>
         <button
           onClick={logout}
-          className="bg-red-500/80 hover:bg-red-500 px-4 py-2 rounded-xl font-bold transition-colors"
+          className="bg-white/10 hover:bg-white/20 ring-1 ring-white/20 h-10 px-5 rounded-md font-medium text-sm transition-colors"
         >
           Sign Out
         </button>
@@ -25,9 +25,9 @@ export default function SignInButton() {
   return (
     <button
       onClick={login}
-      className="bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-xl font-bold transition-colors"
+      className="bg-white/10 hover:bg-white/20 ring-1 ring-white/20 h-10 px-5 rounded-md font-medium text-sm transition-colors"
     >
-      Sign In
+      Login
     </button>
   );
 }
