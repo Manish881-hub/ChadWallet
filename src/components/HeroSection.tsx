@@ -3,19 +3,21 @@ import Link from 'next/link';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen">
+    <section className="relative flex flex-col items-center justify-center w-full pt-10 md:pt-20">
       <img
         alt=""
         aria-hidden="true"
         fetchPriority="high"
-        className="absolute top-0 left-0 w-full -z-10 pointer-events-none select-none"
+        className="absolute top-0 left-0 w-full h-[200vh] -z-10 pointer-events-none select-none object-cover"
+        style={{
+          maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+        }}
         src="/landingpage/space-bg.webp"
       />
 
-
-
-      <div className="relative z-10 flex flex-col items-center pt-16 md:pt-20 text-center">
-        <div className="max-w-4xl mx-auto animate-fade-up">
+      <div className="relative z-10 flex flex-col items-center text-center px-6 gap-5 md:gap-8">
+        <div className="flex flex-col gap-2 items-center text-center w-full max-w-4xl animate-fade-up">
           {/* Giant Logo */}
           <div className="text-[140px] md:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none">
             ChadWallet
@@ -23,52 +25,36 @@ export default function HeroSection() {
           <h1 className="text-5xl md:text-7xl font-semibold leading-[1.05] tracking-tight text-white">
             where traders become legends.
           </h1>
-          <p className="mt-6 text-lg sm:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
-            From memecoins to viral tokens,<br />trade any crypto in seconds.
+          <p className="mt-4 text-lg sm:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
+            From memecoins to viral tokens, trade any crypto in seconds.
           </p>
-          <div className="mt-8 mb-16 md:mb-24 flex items-center justify-center gap-4 flex-wrap">
-            <Link
-              href="/trade"
-              className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
-            >
-              Start trading
-            </Link>
-            <a
-              href="#"
-              className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-2xl border border-white/10 transition-all"
-            >
-              Download app
-            </a>
-          </div>
         </div>
 
+        <div className="flex gap-4 flex-wrap justify-center animate-fade-up z-10">
+          <Link
+            href="/trade"
+            className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
+          >
+            Start trading
+          </Link>
+          <a
+            href="#"
+            className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-2xl border border-white/10 transition-all"
+          >
+            Download app
+          </a>
+        </div>
       </div>
 
-      {/* Astronaut */}
-      <div
-        className="
-          absolute
-          left-1/2
-          bottom-[-180px]
-          -translate-x-1/2
-          z-0
-          pointer-events-none
-        "
-      >
-        <img
-          src="/flow/astronaut-mobile.webp"
-          alt=""
-          className="
-            w-[500px]
-            md:w-[500px]
-            lg:w-[500px]
-            object-contain
-            animate-[float_6s_ease-in-out_infinite]
-          "
-        />
-      </div>
+      {/* Astronaut - Now in document flow with negative top margin */}
+      <img
+        src="/flow/astronaut-mobile.webp"
+        alt="Astronaut"
+        className="w-[300px] md:w-[450px] object-contain animate-[float_6s_ease-in-out_infinite] -mt-10 md:-mt-20 z-0 relative pointer-events-none"
+      />
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6">
+      {/* Decorative SVGs */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 pointer-events-none">
         <svg className="w-8 h-auto opacity-50" viewBox="0 0 40 24" fill="none">
           <rect x="0.5" y="0.5" width="39" height="23" rx="3.5" stroke="#9CA3AF" />
           <circle cx="20" cy="13" r="5" fill="#9CA3AF" opacity="0.3" />

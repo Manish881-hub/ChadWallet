@@ -10,6 +10,10 @@ export default function CommunitySection() {
           alt=""
           fill
           className="object-cover"
+          style={{
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)'
+          }}
           priority
         />
 
@@ -20,8 +24,8 @@ export default function CommunitySection() {
             absolute
             inset-0
             bg-gradient-to-b
-            from-[#2E3192]/30
-            via-transparent
+            from-[#050816]
+            via-[#2E3192]/20
             to-[#040611]
           "
         />
