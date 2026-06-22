@@ -15,7 +15,7 @@ const PlayStoreIcon = () => (
 
 export default function Header() {
   return (
-    <header className="absolute top-0 left-0 w-full z-50 flex items-center h-16 pt-3 px-5 justify-between hidden md:flex">
+    <header className="absolute top-0 left-0 w-full z-50 flex items-center h-16 pt-3 px-5 justify-between">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2">
         <img src="/logo/dark.png" alt="ChadWallet Logo" className="w-8 h-8 object-contain" />
@@ -25,13 +25,13 @@ export default function Header() {
       </Link>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         {/* Apple App Store */}
         <a
           href="https://apps.apple.com/us/app/chadwallet/id6757367474"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
         >
           <AppleIcon />
           <div className="flex flex-col items-start leading-none">
@@ -45,7 +45,7 @@ export default function Header() {
           href="https://play.google.com/store/apps/details?id=xyz.chadwallet.www&pli=1"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
         >
           <PlayStoreIcon />
           <div className="flex flex-col items-start leading-none">
@@ -55,7 +55,7 @@ export default function Header() {
         </a>
 
         {/* Login Button */}
-        <div className="ml-2">
+        <div className="ml-1 md:ml-2">
           <SignInButton />
         </div>
       </div>

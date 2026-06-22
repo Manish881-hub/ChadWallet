@@ -48,7 +48,7 @@ export default function HeroSection() {
 
       {/* Astronaut - Now in document flow with negative top margin */}
       <img
-        src="/flow/astronaut-mobile.webp"
+        src="/landingpage/astronaut-mobile.webp"
         alt="Astronaut"
         className="w-[300px] md:w-[450px] object-contain animate-[float_6s_ease-in-out_infinite] -mt-10 md:-mt-20 z-0 relative pointer-events-none"
       />
