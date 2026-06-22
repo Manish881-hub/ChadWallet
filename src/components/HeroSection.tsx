@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen overflow-hidden">
+    <section className="relative min-h-screen">
       <img
         alt=""
         aria-hidden="true"
@@ -14,7 +14,7 @@ export default function HeroSection() {
 
 
 
-      <div className="relative z-10 flex flex-col items-center pt-16 md:pt-20 text-center min-h-screen">
+      <div className="relative z-10 flex flex-col items-center pt-16 md:pt-20 text-center">
         <div className="max-w-4xl mx-auto animate-fade-up">
           {/* Giant Logo */}
           <div className="text-[140px] md:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none">
@@ -26,7 +26,7 @@ export default function HeroSection() {
           <p className="mt-6 text-lg sm:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
             From memecoins to viral tokens,<br />trade any crypto in seconds.
           </p>
-          <div className="mt-8 mb-[120px] md:mb-[180px] flex items-center justify-center gap-4 flex-wrap">
+          <div className="mt-8 mb-16 md:mb-24 flex items-center justify-center gap-4 flex-wrap">
             <Link
               href="/trade"
               className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"

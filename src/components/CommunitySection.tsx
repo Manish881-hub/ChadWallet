@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function CommunitySection() {
   return (
@@ -37,11 +38,11 @@ export default function CommunitySection() {
           <Image
             src="/flow/outer-circle.webp"
             alt=""
-            width={1400}
-            height={1400}
+            width={1000}
+            height={1000}
             className="
               absolute
-              opacity-30
+              opacity
               animate-[spin_60s_linear_infinite]
             "
           />
@@ -49,11 +50,11 @@ export default function CommunitySection() {
           <Image
             src="/flow/inner-circle.webp"
             alt=""
-            width={1050}
-            height={1050}
+            width={650}
+            height={650}
             className="
               absolute
-              opacity-30
+              opacity
               animate-spin-reverse
             "
           />
@@ -99,33 +100,20 @@ export default function CommunitySection() {
             join 500,000 traders making their name on ChadWallet
           </p>
 
-          <div className="mt-10 flex gap-4">
-            <button
-              className="
-                px-10
-                h-[64px]
-                rounded-2xl
-                bg-[#5B5CEB]
-                text-white
-                font-semibold
-              "
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/trade"
+              className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
             >
-              Start Trading
-            </button>
+              Start trading
+            </Link>
 
-            <button
-              className="
-                px-10
-                h-[64px]
-                rounded-2xl
-                bg-white/10
-                backdrop-blur-md
-                text-white
-                font-semibold
-              "
+            <a
+              href="#"
+              className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-2xl border border-white/10 transition-all"
             >
-              Download App
-            </button>
+              Download app
+            </a>
           </div>
         </div>
       </div>

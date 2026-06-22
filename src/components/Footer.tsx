@@ -2,57 +2,47 @@ import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-dark">
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="flex flex-col md:flex-row items-start justify-between gap-12">
-          <div className="flex items-start gap-3">
-            <Image src="/logo/dark.png" alt="ChadWallet" width={28} height={28} className="w-7 h-7 mt-1 shrink-0" />
-            <div>
-              <p className="text-white font-bold">ChadWallet</p>
-              <p className="text-sm text-secondary-text mt-1">where traders become legends.</p>
-            </div>
-          </div>
+    <footer className="px-10 pt-8 pb-12 flex flex-col md:flex-row gap-10 items-start justify-between bg-[#040611]">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-start">
+          <h3 className="text-white font-bold text-[48px] tracking-[-0.04em] leading-none mb-2">
+            ChadWallet
+          </h3>
+          <p className="text-[20px] text-[#A4A9C6] tracking-tight">
+            where traders become legends.
+          </p>
+        </div>
+        <div className="text-muted hidden md:block">
+          © 2026 ChadWallet Inc.
+        </div>
+      </div>
 
-          <div className="flex flex-wrap gap-12">
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-muted mb-4">About</h4>
-              <ul className="space-y-3">
-                <li><a href="/blog" className="text-sm text-secondary-text hover:text-white transition-colors">Blog</a></li>
-                <li><a href="/faq" className="text-sm text-secondary-text hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="/affiliates" className="text-sm text-secondary-text hover:text-white transition-colors">Affiliates</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-muted mb-4">Social</h4>
-              <ul className="space-y-3">
-                <li><a href="https://discord.gg/chadwallet" target="_blank" className="text-sm text-secondary-text hover:text-white transition-colors">Discord</a></li>
-                <li><a href="https://x.com/chadwallet" target="_blank" className="text-sm text-secondary-text hover:text-white transition-colors">X / Twitter</a></li>
-                <li><a href="https://instagram.com/chadwallet" target="_blank" className="text-sm text-secondary-text hover:text-white transition-colors">Instagram</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-muted mb-4">Legal</h4>
-              <ul className="space-y-3">
-                <li><a href="/privacy" className="text-sm text-secondary-text hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms" className="text-sm text-secondary-text hover:text-white transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
-          </div>
+      <div className="flex items-start flex-col md:flex-row gap-8 md:gap-2">
+        <div className="flex flex-col items-start gap-2 min-w-40">
+          <div className="text-muted font-mono text-sm">ABOUT</div>
+          <a className="text-sm text-secondary-text hover:text-white" href="/blog" data-discover="true">Blog</a>
+          <a className="text-sm text-secondary-text hover:text-white" href="/answers" data-discover="true">FAQ</a>
+          <a className="text-sm text-secondary-text hover:text-white" href="/affiliates" data-discover="true">Affiliates</a>
+        </div>
+        
+        <div className="flex flex-col items-start gap-2 min-w-40">
+          <div className="text-muted font-mono text-sm">SOCIAL</div>
+          <a href="https://discord.gg/fomofamily" className="text-sm text-secondary-text hover:text-white" target="_blank" rel="noopener noreferrer">Discord</a>
+          <a href="https://x.com/fomo" className="text-sm text-secondary-text hover:text-white" target="_blank" rel="noopener noreferrer">X/Twitter</a>
+          <a href="https://www.instagram.com/tryfomo" className="text-sm text-secondary-text hover:text-white" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/channel/UCQAgxFZYN2GhYKrXG4ypnUg" className="text-sm text-secondary-text hover:text-white" target="_blank" rel="noopener noreferrer">Youtube</a>
+          <a href="https://www.linkedin.com/company/tryfomo/" className="text-sm text-secondary-text hover:text-white" target="_blank" rel="noopener noreferrer">LinkedIn</a>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted">© 2026 ChadWallet. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <svg className="w-6 h-auto opacity-30" viewBox="0 0 40 24" fill="none">
-              <rect x="0.5" y="0.5" width="39" height="23" rx="3.5" stroke="#9CA3AF" />
-              <circle cx="20" cy="13" r="5" fill="#9CA3AF" opacity="0.3" />
-            </svg>
-            <svg className="w-8 h-auto opacity-30" viewBox="0 0 56 24" fill="none">
-              <rect x="0.5" y="0.5" width="55" height="23" rx="3.5" stroke="#9CA3AF" />
-              <circle cx="20" cy="12" r="7" fill="#9CA3AF" opacity="0.3" />
-            </svg>
-          </div>
+        <div className="flex flex-col items-start gap-2 min-w-40">
+          <div className="text-muted font-mono text-sm">LEGAL</div>
+          <a className="text-sm text-secondary-text hover:text-white" href="/privacy-policy" data-discover="true">Privacy Policy</a>
+          <a className="text-sm text-secondary-text hover:text-white" href="/terms" data-discover="true">Terms of Service</a>
         </div>
+      </div>
+      
+      <div className="text-muted block md:hidden">
+        © 2026 ChadWallet Inc.
       </div>
     </footer>
   );
