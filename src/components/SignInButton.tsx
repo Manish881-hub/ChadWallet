@@ -1,8 +1,11 @@
 'use client';
+import { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import LoginModal from './LoginModal';
 
 export default function SignInButton() {
-  const { login, logout, authenticated, user } = usePrivy();
+  const { logout, authenticated, user } = usePrivy();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (authenticated) {
     return (
@@ -23,11 +26,15 @@ export default function SignInButton() {
   }
 
   return (
-    <button
-      onClick={login}
-      className="bg-white/10 hover:bg-white/20 ring-1 ring-white/20 h-10 px-5 rounded-md font-medium text-sm transition-colors"
-    >
-      Login
-    </button>
+    <>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="bg-white/10 hover:bg-white/20 ring-1 ring-white/20 h-10 px-5 rounded-md font-medium text-sm transition-colors"
+      >
+        Login
+      </button>
+      <LoginModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 }
+
