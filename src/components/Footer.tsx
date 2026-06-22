@@ -2,13 +2,13 @@ import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer className="px-10 pt-8 pb-12 flex flex-col md:flex-row gap-10 items-start justify-between bg-[#040611]">
+    <footer className="px-6 sm:px-8 md:px-10 pt-8 pb-12 flex flex-col md:flex-row gap-10 items-start justify-between bg-[#040611]">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-start">
-          <h3 className="text-white font-bold text-[48px] tracking-[-0.04em] leading-none mb-2">
+          <h3 className="text-white font-bold text-[36px] sm:text-[42px] md:text-[48px] tracking-[-0.04em] leading-none mb-2">
             ChadWallet
           </h3>
-          <p className="text-[20px] text-[#A4A9C6] tracking-tight">
+          <p className="text-[18px] sm:text-[20px] text-[#A4A9C6] tracking-tight">
             where traders become legends.
           </p>
         </div>
@@ -17,7 +17,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="flex items-start flex-col md:flex-row gap-8 md:gap-2">
+      <div className="flex items-start flex-col sm:flex-row gap-6 sm:gap-8 md:gap-2 w-full sm:w-auto">
         <div className="flex flex-col items-start gap-2 min-w-40">
           <div className="text-muted font-mono text-sm">ABOUT</div>
           <a className="text-sm text-secondary-text hover:text-white" href="/blog" data-discover="true">Blog</a>

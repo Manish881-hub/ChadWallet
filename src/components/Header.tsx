@@ -18,40 +18,42 @@ const PlayStoreIcon = () => (
 
 export default function Header() {
   return (
-    <header className="absolute top-0 left-0 w-full z-50 flex items-center h-16 pt-3 px-5 justify-between">
+    <header className="absolute top-0 left-0 w-full z-50 flex items-center h-16 pt-3 px-4 sm:px-5 justify-between">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2">
+      <Link href="/" className="flex items-center gap-2 shrink-0">
         <img src="/logo/dark.png" alt="ChadWallet Logo" className="w-8 h-8 object-contain" />
-        <span className="text-xl md:text-2xl font-semibold tracking-tight text-white">
+        <span className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-white">
           ChadWallet
         </span>
       </Link>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-2 md:gap-3">
-        {/* Apple App Store */}
+      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+        {/* Apple App Store — icon only on mobile, full label on md+ */}
         <a
           href="https://apps.apple.com/us/app/chadwallet/id6757367474"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
+          aria-label="Download on the App Store"
+          className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
         >
           <AppleIcon />
-          <div className="flex flex-col items-start leading-none">
+          <div className="hidden md:flex flex-col items-start leading-none">
             <span className="text-[10px] text-gray-300">Download on the</span>
             <span className="text-sm font-semibold text-white">App Store</span>
           </div>
         </a>
 
-        {/* Google Play Store */}
+        {/* Google Play Store — icon only on mobile, full label on md+ */}
         <a
           href="https://play.google.com/store/apps/details?id=xyz.chadwallet.www&pli=1"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
+          aria-label="Get it on Google Play"
+          className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-md hover:ring-1 hover:ring-white/40 transition-all"
         >
           <PlayStoreIcon />
-          <div className="flex flex-col items-start leading-none">
+          <div className="hidden md:flex flex-col items-start leading-none">
             <span className="text-[10px] text-gray-300">GET IT ON</span>
             <span className="text-sm font-semibold text-white">Google Play</span>
           </div>

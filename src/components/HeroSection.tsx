@@ -19,27 +19,27 @@ export default function HeroSection() {
       <div className="relative z-10 flex flex-col items-center text-center px-6 gap-5 md:gap-8">
         <div className="flex flex-col gap-2 items-center text-center w-full max-w-4xl animate-fade-up">
           {/* Giant Logo */}
-          <div className="text-[140px] md:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none">
+          <div className="text-[90px] sm:text-[140px] lg:text-[180px] xl:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none">
             ChadWallet
           </div>
-          <h1 className="text-5xl md:text-7xl font-semibold leading-[1.05] tracking-tight text-white">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-white">
             where traders become legends.
           </h1>
-          <p className="mt-4 text-lg sm:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg lg:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
             From memecoins to viral tokens, trade any crypto in seconds.
           </p>
         </div>
 
-        <div className="flex gap-4 flex-wrap justify-center animate-fade-up z-10">
+        <div className="flex gap-3 sm:gap-4 flex-wrap justify-center animate-fade-up z-10">
           <Link
             href="/trade"
-            className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
+            className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl transition-all text-sm sm:text-base"
           >
             Start trading
           </Link>
           <a
             href="#"
-            className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-2xl border border-white/10 transition-all"
+            className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl border border-white/10 transition-all text-sm sm:text-base"
           >
             Download app
           </a>
@@ -50,7 +50,7 @@ export default function HeroSection() {
       <img
         src="/landingpage/astronaut-mobile.webp"
         alt="Astronaut"
-        className="w-[300px] md:w-[450px] object-contain animate-[float_6s_ease-in-out_infinite] -mt-10 md:-mt-20 z-0 relative pointer-events-none"
+        className="w-[240px] sm:w-[300px] lg:w-[380px] xl:w-[450px] max-w-[85vw] object-contain animate-[float_6s_ease-in-out_infinite] -mt-10 md:-mt-20 z-0 relative pointer-events-none"
       />
 
       {/* Decorative SVGs */}

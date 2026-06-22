@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function CommunitySection() {
   return (
     <section className="relative overflow-hidden">
-      <div className="relative h-[1400px] w-full">
+      <div className="relative h-[700px] sm:h-[900px] md:h-[1100px] lg:h-[1400px] w-full">
         <Image
           src="/flow/legends.webp"
           alt=""
@@ -45,8 +45,13 @@ export default function CommunitySection() {
             width={1000}
             height={1000}
             className="
+              w-[80vw]
+              max-w-[320px]
+              sm:max-w-[480px]
+              md:max-w-[680px]
+              lg:max-w-[1000px]
+              h-auto
               absolute
-              opacity
               animate-[spin_60s_linear_infinite]
             "
           />
@@ -57,8 +62,13 @@ export default function CommunitySection() {
             width={650}
             height={650}
             className="
+              w-[55vw]
+              max-w-[220px]
+              sm:max-w-[320px]
+              md:max-w-[460px]
+              lg:max-w-[650px]
+              h-auto
               absolute
-              opacity
               animate-spin-reverse
             "
           />
@@ -79,12 +89,16 @@ export default function CommunitySection() {
             className="
               text-center
               text-white
-              text-[72px]
-              leading-[72px]
-              md:text-[92px]
-              md:leading-[92px]
+              text-[44px]
+              leading-[1.05]
+              sm:text-[56px]
+              md:text-[72px]
+              md:leading-[72px]
+              lg:text-[92px]
+              lg:leading-[92px]
               tracking-[-0.04em]
               font-bold
+              px-4
             "
           >
             a trading app
@@ -96,15 +110,18 @@ export default function CommunitySection() {
             className="
               mt-6
               text-center
-              text-[22px]
+              text-[18px]
+              sm:text-[20px]
+              md:text-[22px]
               text-[#A4A9C6]
               font-medium
+              px-6
             "
           >
             join 500,000 traders making their name on ChadWallet
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 px-6">
             <Link
               href="/trade"
               className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
