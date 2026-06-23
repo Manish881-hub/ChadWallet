@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { fetchTokenTrades } from '@/lib/birdeye';
+import { logger } from '@/lib/logger';
 
 interface LiveTradesProps {
   address: string;
@@ -43,7 +44,7 @@ export default function LiveTrades({ address }: LiveTradesProps) {
         setError('No trades found');
       }
     } catch (err) {
-      console.error('Trades fetch error:', err);
+      logger.error('Trades fetch error', { error: err });
       setError('Failed to load trades');
     } finally {
       setLoading(false);

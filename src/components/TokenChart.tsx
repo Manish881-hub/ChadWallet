@@ -13,6 +13,7 @@ import {
   type Time,
 } from 'lightweight-charts';
 import { fetchOHLCV } from '@/lib/birdeye';
+import { logger } from '@/lib/logger';
 
 interface TokenChartProps {
   address: string;
@@ -108,7 +109,7 @@ export default function TokenChart({ address }: TokenChartProps) {
       // Fit the chart to show all data
       chartRef.current.timeScale().fitContent();
     } catch (err) {
-      console.error('Chart load error:', err);
+      logger.error('Chart load error', { error: err });
       setError('Failed to load chart data');
     } finally {
       setLoading(false);

@@ -1,21 +1,22 @@
-// Birdeye API helpers — with in-memory cache to avoid 429 rate limits
-import axios from 'axios';
+// Birdeye API helpers — with in-memory cache + retry + structured logging
+import axios, { type AxiosInstance } from 'axios';
+import { logger } from './logger';
+import { NetworkError } from './errors';
 
 const BIRDEYE_API_KEY = process.env.NEXT_PUBLIC_BIRDEYE_API_KEY!;
 const BIRDEYE_BASE_URL = 'https://public-api.birdeye.so';
+const REQUEST_TIMEOUT = 10_000;
+const MAX_RETRIES = 2;
 
-const birdeyeClient = axios.create({
+const birdeyeClient: AxiosInstance = axios.create({
   baseURL: BIRDEYE_BASE_URL,
-  headers: {
-    'X-API-KEY': BIRDEYE_API_KEY,
-    'x-chain': 'solana',
-  },
+  headers: { 'X-API-KEY': BIRDEYE_API_KEY, 'x-chain': 'solana' },
+  timeout: REQUEST_TIMEOUT,
 });
 
 // ── Simple in-memory cache ─────────────────────────────────────────
-// Prevents duplicate requests when multiple components mount simultaneously
-const cache = new Map<string, { data: any; ts: number; promise?: Promise<any> }>();
-const CACHE_TTL = 60_000; // 60 seconds
+const cache = new Map<string, { data: any; ts: number }>();
+const CACHE_TTL = 60_000;
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key);
@@ -27,25 +28,51 @@ function setCache(key: string, data: any) {
   cache.set(key, { data, ts: Date.now() });
 }
 
-// Dedup in-flight requests: if a fetch for the same key is already running, reuse it
+// ── Dedup + retry fetcher ──────────────────────────────────────────
 const inFlight = new Map<string, Promise<any>>();
 
 async function dedupedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
-  // Return from cache if fresh
   const cached = getCached<T>(key);
   if (cached !== null) return cached;
 
-  // If a request for this key is already in-flight, piggyback on it
   if (inFlight.has(key)) return inFlight.get(key) as Promise<T>;
 
-  const promise = fetcher().then((result) => {
-    setCache(key, result);
-    inFlight.delete(key);
-    return result;
-  }).catch((err) => {
-    inFlight.delete(key);
-    throw err;
-  });
+  const execute = async (attempt: number): Promise<T> => {
+    try {
+      const result = await fetcher();
+      setCache(key, result);
+      return result;
+    } catch (err: any) {
+      if (err?.response?.status === 429) {
+        logger.warn('Birdeye rate limited', { key, attempt });
+        if (attempt < MAX_RETRIES) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
+          await new Promise(r => setTimeout(r, delay));
+          return execute(attempt + 1);
+        }
+        const stale = getCached<T>(key);
+        if (stale) return stale;
+      }
+      if (err?.code === 'ECONNABORTED') {
+        logger.warn('Birdeye timeout', { key, attempt });
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, 500));
+          return execute(attempt + 1);
+        }
+      }
+      throw err;
+    }
+  };
+
+  const promise = execute(0)
+    .then((result) => {
+      inFlight.delete(key);
+      return result;
+    })
+    .catch((err) => {
+      inFlight.delete(key);
+      throw err;
+    });
 
   inFlight.set(key, promise);
   return promise;
@@ -60,13 +87,9 @@ function normalizeToken(raw: any): any {
     name: raw.name ?? '',
     logo_uri: raw.logoURI ?? raw.logo_uri ?? raw.icon ?? '',
     price: raw.price ?? raw.v24hUSD ?? 0,
-    // Birdeye exposes several percent-change keys depending on endpoint/version.
     price_change_24h_percent: resolveChange([
-      raw.priceChange24hPercent,
-      raw.price_change_24h_percent,
-      raw.v24hChangePercent,
+      raw.priceChange24hPercent, raw.price_change_24h_percent, raw.v24hChangePercent,
     ]),
-    // Higher-resolution change windows for the stats strip
     price_change_1h_percent: resolveChange([raw.priceChange1hPercent, raw.price_change_1h_percent]),
     price_change_2h_percent: resolveChange([raw.priceChange2hPercent, raw.price_change_2h_percent]),
     price_change_4h_percent: resolveChange([raw.priceChange4hPercent, raw.price_change_4h_percent]),
@@ -84,9 +107,6 @@ function normalizeToken(raw: any): any {
 
 // ── API Functions ──────────────────────────────────────────────────
 
-/**
- * Fetch trending / top tokens from Birdeye (cached 60s, deduped)
- */
 export async function fetchTrendingTokens(): Promise<any[]> {
   return dedupedFetch('trending', async () => {
     try {
@@ -96,46 +116,28 @@ export async function fetchTrendingTokens(): Promise<any[]> {
       const items = data?.data?.tokens ?? data?.data?.items ?? data?.data ?? [];
       return Array.isArray(items) ? items.map(normalizeToken) : [];
     } catch (err: any) {
-      if (err?.response?.status === 429) {
-        console.warn('Birdeye rate limited (429) on trending — returning cached or empty');
-        return getCached<any[]>('trending') ?? [];
-      }
-      console.error('fetchTrendingTokens error:', err);
-      return [];
+      logger.error('fetchTrendingTokens failed', { error: err?.message });
+      return getCached<any[]>('trending') ?? [];
     }
   });
 }
 
-/**
- * Fetch detailed overview for a single token by its mint address (cached 60s, deduped)
- */
 export async function fetchTokenOverview(address: string): Promise<any | null> {
   return dedupedFetch(`overview:${address}`, async () => {
     try {
       const { data } = await birdeyeClient.get('/defi/token_overview', {
         params: { address },
       });
-      const raw = data?.data ?? null;
-      return raw ? normalizeToken(raw) : null;
+      return data?.data ? normalizeToken(data.data) : null;
     } catch (err: any) {
-      if (err?.response?.status === 429) {
-        console.warn('Birdeye rate limited (429) on overview — returning cached or null');
-        return getCached<any>(`overview:${address}`) ?? null;
-      }
-      console.error('fetchTokenOverview error:', err);
-      return null;
+      logger.error('fetchTokenOverview failed', { address, error: err?.message });
+      return getCached<any>(`overview:${address}`) ?? null;
     }
   });
 }
 
-/**
- * Fetch OHLCV candle data for TokenChart (cached 60s, deduped)
- */
 export async function fetchOHLCV(
-  address: string,
-  type: string = '15m',
-  timeFrom?: number,
-  timeTo?: number,
+  address: string, type: string = '15m', timeFrom?: number, timeTo?: number,
 ): Promise<any[]> {
   const now = Math.floor(Date.now() / 1000);
   const from = timeFrom ?? now - 86400;
@@ -147,19 +149,12 @@ export async function fetchOHLCV(
       });
       return data?.data?.items ?? [];
     } catch (err: any) {
-      if (err?.response?.status === 429) {
-        console.warn('Birdeye rate limited (429) on OHLCV');
-      } else {
-        console.error('fetchOHLCV error:', err);
-      }
+      logger.error('fetchOHLCV failed', { address, type, error: err?.message });
       return [];
     }
   });
 }
 
-/**
- * Fetch recent trades for a token (cached 30s, deduped)
- */
 export async function fetchTokenTrades(address: string, limit = 50): Promise<any[]> {
   return dedupedFetch(`trades:${address}`, async () => {
     try {
@@ -168,24 +163,15 @@ export async function fetchTokenTrades(address: string, limit = 50): Promise<any
       });
       return data?.data?.items ?? [];
     } catch (err: any) {
-      if (err?.response?.status === 429) {
-        console.warn('Birdeye rate limited (429) on trades');
-      } else {
-        console.error('fetchTokenTrades error:', err);
-      }
+      logger.error('fetchTokenTrades failed', { address, error: err?.message });
       return [];
     }
   });
 }
 
-/**
- * Fetch a short price history for a token's mini sparkline (cached 60s, deduped).
- * Returns ~20 closing prices. Never throws — returns [] on rate-limit/error so the
- * trending list can render instantly without waiting on sparklines.
- */
 export async function fetchSparkline(address: string, points = 20): Promise<number[]> {
   const now = Math.floor(Date.now() / 1000);
-  const from = now - 6 * 3600; // last 6h is enough resolution for a 20pt sparkline
+  const from = now - 6 * 3600;
   return dedupedFetch(`spark:${address}`, async () => {
     try {
       const { data } = await birdeyeClient.get('/defi/ohlcv', {
@@ -194,14 +180,10 @@ export async function fetchSparkline(address: string, points = 20): Promise<numb
       const items: any[] = data?.data?.items ?? [];
       if (items.length === 0) return [];
       const closes = items.map((it: any) => parseFloat(it.c ?? it.close ?? 0));
-      const sliced = closes.length > points ? closes.slice(closes.length - points) : closes;
+      const sliced = closes.length > points ? closes.slice(-points) : closes;
       return sliced.filter(v => v > 0);
     } catch (err: any) {
-      if (err?.response?.status === 429) {
-        console.warn('Birdeye rate limited (429) on sparkline');
-      } else {
-        console.error('fetchSparkline error:', err);
-      }
+      logger.warn('fetchSparkline failed', { address, error: err?.message });
       return [];
     }
   });

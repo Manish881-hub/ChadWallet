@@ -1,6 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
+import { logger } from '@/lib/logger';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       onClose();
     },
     onError: (error) => {
-      console.error(error);
+      logger.error('OAuth login error', { error });
     }
   });
 

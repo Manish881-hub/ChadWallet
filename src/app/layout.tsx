@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Mono } from 'next/font/google';
 import { Providers } from '@/components/PrivyProvider';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
 
 const inter = Inter({
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${spaceMono.variable}`}>
       <body className="bg-dark text-white antialiased font-sans">
-        <Providers>{children}</Providers>
+        <Providers><ErrorBoundary>{children}</ErrorBoundary></Providers>
       </body>
     </html>
   );

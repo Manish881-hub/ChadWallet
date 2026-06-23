@@ -4,6 +4,7 @@ import { Connection, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import { createJupiterApiClient } from '@jup-ag/api';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchTokenOverview } from '@/lib/birdeye';
+import { logger } from '@/lib/logger';
 
 const connection = new Connection(process.env.NEXT_PUBLIC_ALCHEMY_RPC!);
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
@@ -54,7 +55,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
           setTokenBalance(0);
         }
       } catch (err) {
-        console.error('Balance fetch error:', err);
+        logger.error('Balance fetch error', { error: err });
       }
     })();
   }, [wallet, tokenMint]);
@@ -89,7 +90,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
       });
       setQuote(quoteRes);
     } catch (err: any) {
-      console.error('Quote error:', err);
+      logger.error('Quote fetch error', { error: err });
       setError(err?.response?.data?.message || 'Failed to fetch quote');
     } finally {
       setLoading(false);
@@ -122,7 +123,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         const signed = await solanaProvider.signTransaction(tx);
         signature = await connection.sendRawTransaction(signed.serialize());
       } else {
-        console.error('No signing method available on wallet provider');
+        logger.error('No signing method available on wallet provider');
         setError('Wallet does not support transaction signing');
         return;
       }
@@ -146,12 +147,12 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
               setTokenBalance(0);
             }
           } catch (e) {
-            console.error('Balance refresh error:', e);
+            logger.error('Balance refresh error', { error: e });
           }
         }, 3000);
       }
     } catch (err: any) {
-      console.error('Swap error:', err);
+      logger.error('Swap execution error', { error: err });
       setError(err?.response?.data?.message || err?.message || 'Swap failed');
     } finally {
       setSwapping(false);
