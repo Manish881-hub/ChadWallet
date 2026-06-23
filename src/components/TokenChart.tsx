@@ -83,6 +83,28 @@ export default function TokenChart({ address }: TokenChartProps) {
       candleSeriesRef.current.setData(candles);
       volumeSeriesRef.current.setData(volume);
 
+      // 24H High / Low dashed price lines
+      const high24h = Math.max(...candles.map(c => c.high));
+      const low24h = Math.min(...candles.map(c => c.low));
+      try {
+        candleSeriesRef.current.createPriceLine({
+          price: high24h,
+          color: 'rgba(0, 200, 83, 0.5)',
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: '24H High',
+        });
+        candleSeriesRef.current.createPriceLine({
+          price: low24h,
+          color: 'rgba(255, 23, 68, 0.5)',
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: '24H Low',
+        });
+      } catch {}
+
       // Fit the chart to show all data
       chartRef.current.timeScale().fitContent();
     } catch (err) {
@@ -101,7 +123,7 @@ export default function TokenChart({ address }: TokenChartProps) {
 
     const chart = createChart(container, {
       layout: {
-        background: { type: ColorType.Solid, color: '#0A0A0A' },
+        background: { type: ColorType.Solid, color: '#09090F' },
         textColor: '#A0A0A0',
         fontFamily: "'Space Mono', monospace",
       },
@@ -207,26 +229,44 @@ export default function TokenChart({ address }: TokenChartProps) {
 
   return (
     <div className="flex flex-col gap-3 bg-[#12121B] rounded-xl border border-[rgba(255,255,255,.05)] p-4 h-full">
-      {/* Timeframe selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1">
-          {TIMEFRAMES.map((tf) => (
-            <button
-              key={tf}
-              onClick={() => handleTimeframeChange(tf)}
-              className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg transition-all duration-200 ${
-                timeframe === tf
-                  ? 'bg-[#39FF14]/15 text-[#39FF14] border border-[#39FF14]/30'
-                  : 'text-[#A0A0A0] hover:text-white hover:bg-white/5 border border-transparent'
-              }`}
-            >
-              {tf}
-            </button>
-          ))}
+      {/* Chart header — timeframes + overlays + indicators */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1">
+            {TIMEFRAMES.map((tf) => (
+              <button
+                key={tf}
+                onClick={() => handleTimeframeChange(tf)}
+                className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg transition-all duration-200 ${
+                  timeframe === tf
+                    ? 'bg-[#39FF14]/15 text-[#39FF14] border border-[#39FF14]/30'
+                    : 'text-[#A0A0A0] hover:text-white hover:bg-white/5 border border-transparent'
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+          {loading && (
+            <div className="w-2 h-2 rounded-full bg-[#39FF14] animate-pulse" />
+          )}
         </div>
-        {loading && (
-          <div className="w-2 h-2 rounded-full bg-[#39FF14] animate-pulse" />
-        )}
+        {/* Overlay toggles */}
+        <div className="flex items-center gap-4 text-[10px] font-mono">
+          <label className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer transition-colors">
+            <input type="checkbox" className="accent-[#39FF14] w-3 h-3 rounded" />
+            My swaps
+          </label>
+          <label className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer transition-colors">
+            <input type="checkbox" className="accent-[#39FF14] w-3 h-3 rounded" />
+            Thesis
+          </label>
+          <label className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer transition-colors">
+            <input type="checkbox" className="accent-[#39FF14] w-3 h-3 rounded" />
+            Friends only
+          </label>
+          <span className="ml-auto text-[#6B7280]">Indicators ▾</span>
+        </div>
       </div>
 
       {/* Chart container */}
