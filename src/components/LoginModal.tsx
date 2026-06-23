@@ -32,8 +32,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       onClose();
       window.location.href = `/trade/${DEFAULT_TRADE_ADDRESS}`;
     }, [onClose]),
-    onError: (error) => {
-      logger.error('OAuth login error', { error });
+    onError: (error: any) => {
+      if (error === 'exited_auth_flow') {
+        logger.warn('OAuth flow cancelled by user');
+      } else {
+        logger.error('OAuth login error', { error });
+      }
     },
   });
 
