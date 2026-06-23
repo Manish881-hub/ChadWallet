@@ -8,6 +8,7 @@ import TokenHeader from '@/components/TokenHeader';
 import TokenChart from '@/components/TokenChart';
 import LiveTrades from '@/components/LiveTrades';
 import HoldersTable from '@/components/HoldersTable';
+import TokenAboutPanel from '@/components/TokenAboutPanel';
 import SwapWidget from '@/components/SwapWidget';
 import { fetchTokenOverview } from '@/lib/birdeye';
 
@@ -64,15 +65,26 @@ export default function TradePage() {
           <LiveTrades address={address} />
         </div>
 
-        {/* Right — Swap widget (always visible) */}
-        <aside className="hidden md:flex md:w-[320px] md:min-w-[320px] md:border-l border-[rgba(255,255,255,.05)] md:p-4 md:flex-col md:shrink-0">
-          <SwapWidget tokenMint={address} tokenSymbol={tokenInfo.symbol} />
+        {/* Right — Swap widget + About panel in one unified card */}
+        <aside className="hidden md:flex md:w-[320px] md:min-w-[320px] md:border-l border-[rgba(255,255,255,.05)] md:p-4 md:flex-col md:shrink-0 md:overflow-y-auto">
+          <div className="flex flex-col bg-[#12121B] rounded-xl border border-[rgba(255,255,255,.05)]">
+            <SwapWidget tokenMint={address} tokenSymbol={tokenInfo.symbol} tokenPrice={tokenInfo.price} />
+            <div className="mx-4 border-t border-[rgba(255,255,255,.05)]" />
+            <div className="p-4">
+              <TokenAboutPanel
+                market_cap={tokenInfo.market_cap}
+                price_change_24h_percent={tokenInfo.price_change_24h_percent}
+                price_change_1h_percent={tokenInfo.price_change_1h_percent}
+                price_change_6h_percent={tokenInfo.price_change_6h_percent}
+              />
+            </div>
+          </div>
         </aside>
       </div>
 
       {/* Mobile swap dock */}
-      <div className="md:hidden fixed bottom-8 inset-x-0 z-40 bg-[#12121B] border-t border-[rgba(255,255,255,.05)] p-3">
-        <SwapWidget tokenMint={address} tokenSymbol={tokenInfo.symbol} />
+      <div className="md:hidden fixed bottom-8 inset-x-0 z-40 bg-[#12121B] border-t border-[rgba(255,255,255,.05)] p-3 max-h-[60vh] overflow-y-auto">
+        <SwapWidget tokenMint={address} tokenSymbol={tokenInfo.symbol} tokenPrice={tokenInfo.price} />
       </div>
       <TradeFooter />
     </div>
