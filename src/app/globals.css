@@ -169,3 +169,41 @@
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Thin neon scrollbar (trades list, trending rail) ─────────── */
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(57, 255, 20, 0.25) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(57, 255, 20, 0.25);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(57, 255, 20, 0.45);
+}
+
+/* ── Shimmer skeleton for loading states ───────────────────────── */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(31, 31, 31, 0.4) 25%,
+    rgba(57, 255, 20, 0.06) 37%,
+    rgba(31, 31, 31, 0.4) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
