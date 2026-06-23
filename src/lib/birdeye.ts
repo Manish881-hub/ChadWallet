@@ -15,29 +15,38 @@ const birdeyeClient: AxiosInstance = axios.create({
   timeout: REQUEST_TIMEOUT,
 });
 
-// ── Global request throttle ─────────────────────────────────────────
-// Birdeye free tier: ~10 req/min. We space requests to avoid 429s.
-let lastRequestTime = 0;
-const MIN_REQUEST_GAP = 800;
+// ── Sliding-window rate limiter ─────────────────────────────────────
+// Birdeye free tier: ~10 req/min. We allow bursts up to 8/60s.
+const requestTimestamps: number[] = [];
+const MAX_REQUESTS_PER_WINDOW = 8;
+const WINDOW_MS = 60_000;
 
 async function throttle<T>(fn: () => Promise<T>): Promise<T> {
   const now = Date.now();
-  const elapsed = now - lastRequestTime;
-  if (elapsed < MIN_REQUEST_GAP) {
-    await new Promise(r => setTimeout(r, MIN_REQUEST_GAP - elapsed));
+  while (requestTimestamps.length > 0 && requestTimestamps[0] < now - WINDOW_MS) {
+    requestTimestamps.shift();
   }
-  lastRequestTime = Date.now();
+  if (requestTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    const waitTime = requestTimestamps[0] + WINDOW_MS - now + 100;
+    await new Promise(r => setTimeout(r, waitTime));
+  }
+  requestTimestamps.push(Date.now());
   return fn();
 }
 
-// ── Simple in-memory cache ─────────────────────────────────────────
+// ── In-memory cache with stale-while-revalidate ────────────────────
 const cache = new Map<string, { data: any; ts: number }>();
-const CACHE_TTL = 60_000;
+const CACHE_TTL = 120_000;
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key);
   if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data as T;
   return null;
+}
+
+function getStaleCached<T>(key: string): T | null {
+  const entry = cache.get(key);
+  return entry ? (entry.data as T) : null;
 }
 
 function setCache(key: string, data: any) {
@@ -66,8 +75,9 @@ async function dedupedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<
           await new Promise(r => setTimeout(r, delay));
           return execute(attempt + 1);
         }
-        const stale = getCached<T>(key);
+        const stale = getStaleCached<T>(key);
         if (stale) return stale;
+        return (key.startsWith('overview:') ? null : []) as T;
       }
       if (err?.code === 'ECONNABORTED') {
         logger.warn('Birdeye timeout', { key, attempt });
