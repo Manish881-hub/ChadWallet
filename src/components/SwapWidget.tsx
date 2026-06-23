@@ -2,7 +2,7 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Connection, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import { createJupiterApiClient } from '@jup-ag/api';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const connection = new Connection(process.env.NEXT_PUBLIC_ALCHEMY_RPC!);
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
@@ -13,7 +13,7 @@ type Slippage = 0.5 | 1 | 3;
 const SLIPPAGE_OPTIONS: Slippage[] = [0.5, 1, 3];
 
 export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: string; tokenSymbol: string }) {
-  const { user } = usePrivy();
+  const { user, login } = usePrivy();
   const { wallets } = useWallets();
   const wallet = wallets.find(w => w.walletClientType === 'privy');
 
@@ -154,25 +154,12 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
   const impactLevel = priceImpact > 5 ? 'high' : priceImpact > 1 ? 'medium' : 'low';
   const impactColor = impactLevel === 'high' ? '#FF1744' : impactLevel === 'medium' ? '#FFA726' : '#00C853';
 
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 p-6 bg-[#111111] rounded-xl border border-[#1F1F1F]">
-        <div className="w-10 h-10 rounded-full bg-[#1F1F1F] flex items-center justify-center">
-          <svg className="w-5 h-5 text-[#A0A0A0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-        </div>
-        <p className="text-[#A0A0A0] text-sm font-mono">Connect wallet to trade</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-4 bg-[#111111] rounded-xl border border-[#1F1F1F] p-4">
+    <div className="flex flex-col gap-4 bg-[#12121B] rounded-xl border border-[rgba(255,255,255,.05)] p-4">
       {/* Header with mode toggle */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-white">Swap</h3>
-        <div className="flex rounded-lg overflow-hidden border border-[#1F1F1F]">
+        <div className="flex rounded-lg overflow-hidden border border-[rgba(255,255,255,.08)]">
           <button
             onClick={() => { setMode('buy'); setQuote(null); setTxSignature(null); setError(null); }}
             className={`px-4 py-1.5 text-xs font-mono font-bold transition-all duration-200 ${
@@ -204,7 +191,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
 
       {/* Input */}
       <div className="relative">
-        <div className="flex items-center gap-2 bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] focus-within:border-[#39FF14]/40 transition-colors">
+        <div className="flex items-center gap-2 bg-[#09090F] rounded-lg border border-[rgba(255,255,255,.05)] focus-within:border-[#39FF14]/40 transition-colors">
           <input
             type="number"
             placeholder={`Amount in ${mode === 'buy' ? 'SOL' : tokenSymbol}`}
@@ -233,7 +220,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
                 setAmount(val);
                 setQuote(null);
               }}
-              className="flex-1 py-1 text-[10px] font-mono text-[#A0A0A0] bg-[#0A0A0A] rounded border border-[#1F1F1F] hover:text-white hover:border-[#39FF14]/30 transition-all"
+              className="flex-1 py-1 text-[10px] font-mono text-[#A0A0A0] bg-[#09090F] rounded border border-[rgba(255,255,255,.05)] hover:text-white hover:border-[#39FF14]/30 transition-all"
             >
               {pct}%
             </button>
@@ -254,7 +241,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
               className={`flex-1 py-1.5 text-xs font-mono font-bold rounded-lg border transition-all duration-200 ${
                 slippage === opt
                   ? 'bg-[#39FF14]/10 text-[#39FF14] border-[#39FF14]/30'
-                  : 'text-[#A0A0A0] border-[#1F1F1F] hover:text-white hover:border-[#39FF14]/20'
+                  : 'text-[#A0A0A0] border-[rgba(255,255,255,.05)] hover:text-white hover:border-[#39FF14]/20'
               }`}
             >
               {opt}%
@@ -272,7 +259,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
 
       {/* Quote section */}
       {quote && (
-        <div className="flex flex-col gap-2 bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] p-3">
+        <div className="flex flex-col gap-2 bg-[#09090F] rounded-lg border border-[rgba(255,255,255,.05)] p-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#A0A0A0] font-mono uppercase tracking-wider">You receive</span>
             <span className="text-sm font-mono font-bold text-white tabular-nums">
@@ -300,7 +287,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
           )}
 
           {/* Quote age + refresh */}
-          <div className="flex items-center justify-between mt-1 pt-2 border-t border-[#1F1F1F]/50">
+          <div className="flex items-center justify-between mt-1 pt-2 border-t border-[rgba(255,255,255,.05)]">
             <span className="text-[10px] text-[#A0A0A0] font-mono tabular-nums">
               Quote age: {quoteAge}s
             </span>
@@ -324,7 +311,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
               mode === 'buy'
                 ? swapping
                   ? 'bg-[#00C853]/30 text-[#00C853]/50 cursor-not-allowed'
-                  : 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A] animate-glow-pulse-green hover:scale-[1.01] active:scale-[0.99]'
+                  : 'bg-[#00C853] text-[#09090F] hover:bg-[#00E05A] animate-glow-pulse-green hover:scale-[1.01] active:scale-[0.99]'
                 : swapping
                   ? 'bg-[#FF1744]/30 text-[#FF1744]/50 cursor-not-allowed'
                   : 'bg-[#FF1744] text-white hover:bg-[#FF3D5C] animate-glow-pulse hover:scale-[1.01] active:scale-[0.99]'
@@ -345,20 +332,22 @@ export default function SwapWidget({ tokenMint, tokenSymbol }: { tokenMint: stri
         </div>
       )}
 
-      {/* Get Quote button (when no quote) */}
+      {/* Get Quote / Connect button (when no quote) */}
       {!quote && (
         <button
-          onClick={fetchQuote}
-          disabled={loading || !amount || parseFloat(amount) <= 0}
+          onClick={() => { if (!user) { login(); } else { fetchQuote(); } }}
+          disabled={loading || (!user ? false : !amount || parseFloat(amount) <= 0)}
           className={`w-full py-3 rounded-lg font-mono font-bold text-sm transition-all duration-300 ${
-            loading || !amount || parseFloat(amount) <= 0
-              ? 'bg-[#1F1F1F] text-[#555] cursor-not-allowed'
-              : mode === 'buy'
-                ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A] animate-glow-pulse-green hover:scale-[1.01] active:scale-[0.99]'
-                : 'bg-[#FF1744] text-white hover:bg-[#FF3D5C] animate-glow-pulse hover:scale-[1.01] active:scale-[0.99]'
+            !user
+              ? 'bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/20 hover:bg-[#39FF14]/20'
+              : loading || !amount || parseFloat(amount) <= 0
+                ? 'bg-[#1F1F1F] text-[#555] cursor-not-allowed'
+                : mode === 'buy'
+                  ? 'bg-[#00C853] text-[#09090F] hover:bg-[#00E05A] animate-glow-pulse-green hover:scale-[1.01] active:scale-[0.99]'
+                  : 'bg-[#FF1744] text-white hover:bg-[#FF3D5C] animate-glow-pulse hover:scale-[1.01] active:scale-[0.99]'
           }`}
         >
-          {loading ? (
+          {!user ? 'Connect wallet to trade' : loading ? (
             <span className="flex items-center justify-center gap-2">
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

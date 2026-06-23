@@ -206,7 +206,7 @@ export default function TokenChart({ address }: TokenChartProps) {
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-[#111111] rounded-xl border border-[#1F1F1F] p-4">
+    <div className="flex flex-col gap-3 bg-[#12121B] rounded-xl border border-[rgba(255,255,255,.05)] p-4 h-full">
       {/* Timeframe selector */}
       <div className="flex items-center justify-between">
         <div className="flex gap-1">
@@ -232,7 +232,7 @@ export default function TokenChart({ address }: TokenChartProps) {
       {/* Chart container */}
       <div className="relative w-full h-[320px] sm:h-[400px] md:h-[450px]">
         {loading && !chartRef.current && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A] rounded-lg">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#09090F] rounded-lg">
             <div className="flex flex-col items-center gap-3">
               <div className="w-6 h-6 border-2 border-[#39FF14]/30 border-t-[#39FF14] rounded-full animate-spin" />
               <span className="text-[#A0A0A0] text-sm font-mono">Loading chart...</span>
@@ -241,7 +241,7 @@ export default function TokenChart({ address }: TokenChartProps) {
         )}
 
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A] rounded-lg">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#09090F] rounded-lg">
             <div className="flex flex-col items-center gap-3">
               <span className="text-[#FF1744] text-sm font-mono">{error}</span>
               <button

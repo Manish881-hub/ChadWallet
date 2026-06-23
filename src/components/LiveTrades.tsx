@@ -62,9 +62,9 @@ export default function LiveTrades({ address }: LiveTradesProps) {
   }, [loadTrades]);
 
   return (
-    <div className="flex flex-col bg-[#111111] rounded-xl border border-[#1F1F1F] h-full min-h-[300px] md:min-h-0">
+    <div className="flex flex-col bg-[#12121B] rounded-xl border border-[rgba(255,255,255,.05)] h-full min-h-[300px] md:min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#1F1F1F]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,.05)]">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-bold text-white">Live Trades</h3>
           <div className="w-2 h-2 rounded-full bg-[#00C853] animate-pulse" />
@@ -75,7 +75,7 @@ export default function LiveTrades({ address }: LiveTradesProps) {
       </div>
 
       {/* Column headers */}
-      <div className="grid grid-cols-5 gap-2 px-4 py-2 text-[10px] text-[#A0A0A0] font-mono uppercase tracking-wider border-b border-[#1F1F1F]/50">
+      <div className="grid grid-cols-5 gap-2 px-4 py-2 text-[10px] text-[#A0A0A0] font-mono uppercase tracking-wider border-b border-[rgba(255,255,255,.05)]">
         <span>Time</span>
         <span>Type</span>
         <span className="text-right">USD</span>
@@ -113,8 +113,8 @@ export default function LiveTrades({ address }: LiveTradesProps) {
 
             return (
               <div
-                key={txHash || `trade-${i}`}
-                className={`grid grid-cols-5 gap-2 px-4 py-2.5 text-xs font-mono tabular-nums border-b border-[#1F1F1F]/30 transition-colors hover:bg-white/[0.02] ${
+                key={`${txHash || 'trade'}-${i}`}
+                className={`grid grid-cols-5 gap-2 px-4 py-2.5 text-xs font-mono tabular-nums border-b border-[rgba(255,255,255,.03)] transition-colors hover:bg-white/[0.02] ${
                   i === 0 ? 'animate-fade-up' : ''
                 }`}
               >

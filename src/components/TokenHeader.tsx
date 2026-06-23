@@ -52,7 +52,7 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
         {token.logo_uri ? (
           <img src={token.logo_uri} alt={token.symbol} className="w-10 h-10 rounded-full shrink-0" />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-[#1F1F1F] shrink-0 flex items-center justify-center text-xs font-mono text-[#A0A0A0]">
+          <div className="w-10 h-10 rounded-full bg-[#12121B] shrink-0 flex items-center justify-center text-xs font-mono text-[#A0A0A0] border border-[rgba(255,255,255,.05)]">
             {(token.symbol ?? '?').slice(0, 2)}
           </div>
         )}
@@ -83,7 +83,7 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="flex flex-col gap-0.5 px-3 py-1.5 rounded-lg bg-[#111111] border border-[#1F1F1F] min-w-[88px]"
+              className="flex flex-col gap-0.5 px-3 py-1.5 rounded-lg bg-[#12121B] border border-[rgba(255,255,255,.05)] min-w-[88px]"
             >
               <span className="text-[9px] uppercase tracking-wider font-mono text-[#A0A0A0]">{s.label}</span>
               <span

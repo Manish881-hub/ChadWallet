@@ -22,36 +22,12 @@ export default function TrendingList({ current }: { current?: string }) {
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Heading */}
-      <div className="flex items-center gap-2 px-1 mb-3">
-        <span className="text-base">🔥</span>
-        <h2 className="text-sm font-bold text-white tracking-wide uppercase font-mono">Trending</h2>
-        <span className="ml-auto text-[10px] text-[#A0A0A0] font-mono tabular-nums">
+      <div className="flex items-center gap-2 px-3 py-3 border-b border-[rgba(255,255,255,.05)]">
+        <span className="text-sm">🔥</span>
+        <h2 className="text-xs font-bold text-white tracking-wide uppercase font-mono">Trending</h2>
+        <span className="ml-auto text-[10px] text-[#6B7280] font-mono tabular-nums">
           {tokens.length}
         </span>
-      </div>
-
-      {/* Search */}
-      <div className="px-1 mb-3">
-        <div className="flex items-center gap-2 bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] focus-within:border-[#39FF14]/40 transition-colors px-3">
-          <svg className="w-3.5 h-3.5 text-[#A0A0A0] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search token..."
-            className="flex-1 bg-transparent py-2 text-xs text-white font-mono outline-none placeholder:text-[#555]"
-          />
-          {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="text-[#A0A0A0] hover:text-white text-xs"
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
-          )}
-        </div>
       </div>
 
       {/* List */}
@@ -68,7 +44,7 @@ export default function TrendingList({ current }: { current?: string }) {
           <p className="text-[#A0A0A0] text-xs font-mono text-center py-8">No matches</p>
         )}
 
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col">
           {filtered.map((token) => {
             const isActive = token.address === current;
             const change = token.price_change_24h_percent ?? 0;
@@ -77,35 +53,38 @@ export default function TrendingList({ current }: { current?: string }) {
               <li key={token.address}>
                 <Link
                   href={`/trade/${token.address}`}
-                  className={`flex items-center gap-2 px-2 py-2 rounded-lg transition-colors border ${
+                  className={`flex items-center gap-2 px-3 py-2.5 transition-colors border-b border-[rgba(255,255,255,.03)] ${
                     isActive
-                      ? 'bg-[#111111] border-[#39FF14]/30'
-                      : 'border-transparent hover:bg-white/5'
+                      ? 'bg-[#12121B] border-l-2 border-l-[#39FF14]'
+                      : 'border-l-2 border-l-transparent hover:bg-white/[.02]'
                   }`}
                 >
                   {token.logo_uri ? (
-                    <img src={token.logo_uri} className="w-6 h-6 rounded-full shrink-0" alt={token.symbol} />
+                    <img src={token.logo_uri} className="w-7 h-7 rounded-full shrink-0" alt={token.symbol} />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-[#1F1F1F] shrink-0 flex items-center justify-center text-[9px] font-mono text-[#A0A0A0]">
+                    <div className="w-7 h-7 rounded-full bg-[#1F1F1F] shrink-0 flex items-center justify-center text-[9px] font-mono text-[#A0A0A0]">
                       {(token.symbol ?? '?').slice(0, 2)}
                     </div>
                   )}
 
                   <div className="flex-1 min-w-0">
-                    <span className="font-bold text-sm text-white truncate block leading-tight">{token.symbol}</span>
-                    <span className="text-[10px] text-[#A0A0A0] truncate block leading-tight">{token.name}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-white truncate">{token.symbol}</span>
+                      <span className="text-[9px] text-[#6B7280] font-mono tabular-nums">
+                        {formatMarketCap(token.market_cap)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[11px] font-mono tabular-nums text-white">
+                        ${formatCompact(token.price)}
+                      </span>
+                      <span className={`text-[10px] font-mono tabular-nums ${positive ? 'text-[#00C853]' : 'text-[#FF1744]'}`}>
+                        {positive ? '+' : ''}{change.toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
 
-                  <Sparkline address={token.address} width={44} height={18} />
-
-                  <div className="flex flex-col items-end shrink-0 w-14">
-                    <span className="text-[11px] font-mono tabular-nums text-white">
-                      ${formatCompact(token.price)}
-                    </span>
-                    <span className={`text-[10px] font-mono tabular-nums ${positive ? 'text-[#00C853]' : 'text-[#FF1744]'}`}>
-                      {positive ? '+' : ''}{change.toFixed(1)}%
-                    </span>
-                  </div>
+                  <Sparkline address={token.address} width={40} height={16} />
                 </Link>
               </li>
             );
@@ -122,4 +101,12 @@ function formatCompact(value: number): string {
   if (value >= 0.01) return value.toFixed(4);
   if (value >= 0.0001) return value.toFixed(6);
   return value.toPrecision(2);
+}
+
+function formatMarketCap(value: number): string {
+  if (!value || value <= 0) return '';
+  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
+  return `$${value.toFixed(0)}`;
 }

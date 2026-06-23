@@ -11,9 +11,9 @@
   --color-border: #1F2937;
 
   /* FOMO color tokens */
-  --color-fomo-bg: #0A0A0A;
-  --color-fomo-card: #111111;
-  --color-fomo-border: #1F1F1F;
+  --color-fomo-bg: #09090F;
+  --color-fomo-card: #12121B;
+  --color-fomo-border: rgba(255,255,255,.05);
   --color-fomo-green: #00C853;
   --color-fomo-red: #FF1744;
   --color-fomo-neon: #39FF14;
