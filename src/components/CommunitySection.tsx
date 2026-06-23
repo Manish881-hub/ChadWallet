@@ -123,7 +123,7 @@ export default function CommunitySection() {
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4 px-6">
             <Link
-              href="/trade"
+              href="/trade/So11111111111111111111111111111111111111112"
               className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
             >
               Start trading

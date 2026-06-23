@@ -32,7 +32,7 @@ export default function HeroSection() {
 
         <div className="flex gap-3 sm:gap-4 flex-wrap justify-center animate-fade-up z-10">
           <Link
-            href="/trade"
+            href="/trade/So11111111111111111111111111111111111111112"
             className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl transition-all text-sm sm:text-base"
           >
             Start trading

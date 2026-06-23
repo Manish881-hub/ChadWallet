@@ -1,4 +1,4 @@
-// Birdeye API helpers — with in-memory cache + retry + structured logging
+// Birdeye API helpers — with in-memory cache + retry + global throttling
 import axios, { type AxiosInstance } from 'axios';
 import { logger } from './logger';
 import { NetworkError } from './errors';
@@ -6,13 +6,29 @@ import { NetworkError } from './errors';
 const BIRDEYE_API_KEY = process.env.NEXT_PUBLIC_BIRDEYE_API_KEY!;
 const BIRDEYE_BASE_URL = 'https://public-api.birdeye.so';
 const REQUEST_TIMEOUT = 10_000;
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 3;
+const RETRY_429_DELAY = 5_000;
 
 const birdeyeClient: AxiosInstance = axios.create({
   baseURL: BIRDEYE_BASE_URL,
   headers: { 'X-API-KEY': BIRDEYE_API_KEY, 'x-chain': 'solana' },
   timeout: REQUEST_TIMEOUT,
 });
+
+// ── Global request throttle ─────────────────────────────────────────
+// Birdeye free tier: ~10 req/min. We space requests to avoid 429s.
+let lastRequestTime = 0;
+const MIN_REQUEST_GAP = 800;
+
+async function throttle<T>(fn: () => Promise<T>): Promise<T> {
+  const now = Date.now();
+  const elapsed = now - lastRequestTime;
+  if (elapsed < MIN_REQUEST_GAP) {
+    await new Promise(r => setTimeout(r, MIN_REQUEST_GAP - elapsed));
+  }
+  lastRequestTime = Date.now();
+  return fn();
+}
 
 // ── Simple in-memory cache ─────────────────────────────────────────
 const cache = new Map<string, { data: any; ts: number }>();
@@ -39,14 +55,14 @@ async function dedupedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<
 
   const execute = async (attempt: number): Promise<T> => {
     try {
-      const result = await fetcher();
+      const result = await throttle(fetcher);
       setCache(key, result);
       return result;
     } catch (err: any) {
       if (err?.response?.status === 429) {
         logger.warn('Birdeye rate limited', { key, attempt });
         if (attempt < MAX_RETRIES) {
-          const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
+          const delay = RETRY_429_DELAY * Math.pow(2, attempt);
           await new Promise(r => setTimeout(r, delay));
           return execute(attempt + 1);
         }
@@ -56,7 +72,7 @@ async function dedupedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<
       if (err?.code === 'ECONNABORTED') {
         logger.warn('Birdeye timeout', { key, attempt });
         if (attempt < MAX_RETRIES) {
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, 1000));
           return execute(attempt + 1);
         }
       }

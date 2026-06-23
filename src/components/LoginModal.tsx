@@ -1,5 +1,6 @@
 'use client';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
 import { logger } from '@/lib/logger';
 
@@ -7,6 +8,8 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const DEFAULT_TRADE_ADDRESS = 'So11111111111111111111111111111111111111112';
 
 const AppleIcon = () => (
   <svg viewBox="0 0 384 512" width="20" height="20" fill="currentColor">
@@ -25,9 +28,11 @@ const GoogleIcon = () => (
 );
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const router = useRouter();
   const { initOAuth } = useLoginWithOAuth({
     onComplete: () => {
       onClose();
+      router.push(`/trade/${DEFAULT_TRADE_ADDRESS}`);
     },
     onError: (error) => {
       logger.error('OAuth login error', { error });
