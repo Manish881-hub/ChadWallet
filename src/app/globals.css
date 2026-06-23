@@ -2,13 +2,27 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
   --color-primary: #6366F1;
   --color-dark: #050816;
   --color-card: #0A0D1A;
   --color-secondary-text: #9CA3AF;
   --color-muted: #6B7280;
   --color-border: #1F2937;
+
+  /* FOMO color tokens */
+  --color-fomo-bg: #0A0A0A;
+  --color-fomo-card: #111111;
+  --color-fomo-border: #1F1F1F;
+  --color-fomo-green: #00C853;
+  --color-fomo-red: #FF1744;
+  --color-fomo-neon: #39FF14;
+  --color-fomo-pink: #FF2D55;
+  --color-fomo-text: #FFFFFF;
+  --color-fomo-muted: #A0A0A0;
 }
+
+/* ── Keyframes ──────────────────────────────────────────────────── */
 
 @keyframes fade-up {
   from {
@@ -38,6 +52,53 @@
     transform: translateY(-12px);
   }
 }
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px 2px rgba(57, 255, 20, 0.15), 0 0 20px 4px rgba(57, 255, 20, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 16px 6px rgba(57, 255, 20, 0.3), 0 0 40px 8px rgba(57, 255, 20, 0.1);
+  }
+}
+
+@keyframes glow-pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 8px 2px rgba(0, 200, 83, 0.2), 0 0 20px 4px rgba(0, 200, 83, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 20px 8px rgba(0, 200, 83, 0.4), 0 0 48px 12px rgba(0, 200, 83, 0.1);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(57, 255, 20, 0.15);
+  }
+  50% {
+    border-color: rgba(57, 255, 20, 0.35);
+  }
+}
+
+/* ── Utility Classes ────────────────────────────────────────────── */
 
 .animate-fade-up {
   animation: fade-up 0.7s ease-out forwards;
@@ -79,16 +140,32 @@
   animation: float 4s ease-in-out 2s infinite;
 }
 
-@keyframes spin-reverse {
-  from {
-    transform: rotate(360deg);
-  }
-
-  to {
-    transform: rotate(0deg);
-  }
-}
-
 .animate-spin-reverse {
   animation: spin-reverse 45s linear infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-glow-pulse-green {
+  animation: glow-pulse-green 2.5s ease-in-out infinite;
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee 40s linear infinite reverse;
+}
+
+.animate-pulse-border {
+  animation: pulse-border 3s ease-in-out infinite;
+}
+
+/* ── Tabular nums for price alignment ──────────────────────────── */
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
