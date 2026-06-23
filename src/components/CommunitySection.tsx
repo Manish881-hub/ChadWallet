@@ -5,20 +5,6 @@ export default function CommunitySection() {
   return (
     <section className="relative overflow-hidden">
       <div className="relative h-[700px] sm:h-[900px] md:h-[1100px] lg:h-[1400px] w-full">
-        <Image
-          src="/landingpage/legends.webp"
-          alt=""
-          fill
-          className="object-cover"
-          style={{
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%)'
-          }}
-          priority
-        />
-
-        <div className="absolute inset-0 bg-black/20" />
-
         <div
           className="
             absolute
@@ -28,6 +14,20 @@ export default function CommunitySection() {
             via-[#2E3192]/20
             to-[#040611]
           "
+        />
+
+        <div className="absolute inset-0 bg-black/20" />
+
+        <Image
+          src="/landingpage/legends.webp"
+          alt=""
+          fill
+          className="object-cover"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+          }}
+          priority
         />
 
         <div
