@@ -1,6 +1,5 @@
 'use client';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useCallback } from 'react';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
 import { logger } from '@/lib/logger';
 
@@ -28,15 +27,14 @@ const GoogleIcon = () => (
 );
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const router = useRouter();
   const { initOAuth } = useLoginWithOAuth({
-    onComplete: () => {
+    onComplete: useCallback(() => {
       onClose();
-      router.push(`/trade/${DEFAULT_TRADE_ADDRESS}`);
-    },
+      window.location.href = `/trade/${DEFAULT_TRADE_ADDRESS}`;
+    }, [onClose]),
     onError: (error) => {
       logger.error('OAuth login error', { error });
-    }
+    },
   });
 
   // Close on escape key
