@@ -53,15 +53,31 @@ async function dedupedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<
 
 // ── Normalize ──────────────────────────────────────────────────────
 function normalizeToken(raw: any): any {
+  const resolveChange = (vals: any[]) => vals.find(v => typeof v === 'number' && !Number.isNaN(v)) ?? 0;
   return {
     address: raw.address ?? '',
     symbol: raw.symbol ?? '???',
     name: raw.name ?? '',
     logo_uri: raw.logoURI ?? raw.logo_uri ?? raw.icon ?? '',
     price: raw.price ?? raw.v24hUSD ?? 0,
-    price_change_24h_percent: raw.priceChange24hPercent ?? raw.price_change_24h_percent ?? raw.v24hChangePercent ?? 0,
+    // Birdeye exposes several percent-change keys depending on endpoint/version.
+    price_change_24h_percent: resolveChange([
+      raw.priceChange24hPercent,
+      raw.price_change_24h_percent,
+      raw.v24hChangePercent,
+    ]),
+    // Higher-resolution change windows for the stats strip
+    price_change_1h_percent: resolveChange([raw.priceChange1hPercent, raw.price_change_1h_percent]),
+    price_change_2h_percent: resolveChange([raw.priceChange2hPercent, raw.price_change_2h_percent]),
+    price_change_4h_percent: resolveChange([raw.priceChange4hPercent, raw.price_change_4h_percent]),
+    price_change_6h_percent: resolveChange([raw.priceChange6hPercent, raw.price_change_6h_percent]),
+    price_change_8h_percent: resolveChange([raw.priceChange8hPercent, raw.price_change_8h_percent]),
+    price_change_12h_percent: resolveChange([raw.priceChange12hPercent, raw.price_change_12h_percent]),
+    price_change_5m_percent: resolveChange([raw.priceChange5mPercent, raw.price_change_5m_percent]),
     market_cap: raw.mc ?? raw.market_cap ?? raw.marketCap ?? 0,
+    real_fdv: raw.realFd ?? raw.real_fdv ?? raw.realFdv ?? raw.fdv ?? 0,
     volume_24h: raw.v24hUSD ?? raw.volume24h ?? 0,
+    liquidity: raw.liquidity ?? raw.liquidityUSD ?? raw.real_liquidity ?? 0,
     holder: raw.holder ?? raw.holders ?? 0,
   };
 }
@@ -156,6 +172,35 @@ export async function fetchTokenTrades(address: string, limit = 50): Promise<any
         console.warn('Birdeye rate limited (429) on trades');
       } else {
         console.error('fetchTokenTrades error:', err);
+      }
+      return [];
+    }
+  });
+}
+
+/**
+ * Fetch a short price history for a token's mini sparkline (cached 60s, deduped).
+ * Returns ~20 closing prices. Never throws — returns [] on rate-limit/error so the
+ * trending list can render instantly without waiting on sparklines.
+ */
+export async function fetchSparkline(address: string, points = 20): Promise<number[]> {
+  const now = Math.floor(Date.now() / 1000);
+  const from = now - 6 * 3600; // last 6h is enough resolution for a 20pt sparkline
+  return dedupedFetch(`spark:${address}`, async () => {
+    try {
+      const { data } = await birdeyeClient.get('/defi/ohlcv', {
+        params: { address, type: '15m', time_from: from, time_to: now },
+      });
+      const items: any[] = data?.data?.items ?? [];
+      if (items.length === 0) return [];
+      const closes = items.map((it: any) => parseFloat(it.c ?? it.close ?? 0));
+      const sliced = closes.length > points ? closes.slice(closes.length - points) : closes;
+      return sliced.filter(v => v > 0);
+    } catch (err: any) {
+      if (err?.response?.status === 429) {
+        console.warn('Birdeye rate limited (429) on sparkline');
+      } else {
+        console.error('fetchSparkline error:', err);
       }
       return [];
     }

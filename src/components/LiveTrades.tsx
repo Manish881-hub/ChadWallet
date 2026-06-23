@@ -84,7 +84,7 @@ export default function LiveTrades({ address }: LiveTradesProps) {
       </div>
 
       {/* Trades list */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0">
         {loading && (
           <div className="flex items-center justify-center h-32">
             <div className="w-5 h-5 border-2 border-[#39FF14]/30 border-t-[#39FF14] rounded-full animate-spin" />

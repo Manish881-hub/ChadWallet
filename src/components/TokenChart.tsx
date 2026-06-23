@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import {
   createChart,
-  type IChartApi,
-  type CandlestickData,
-  type Time,
   ColorType,
   CrosshairMode,
+  CandlestickSeries,
+  HistogramSeries,
+  type IChartApi,
+  type CandlestickData,
+  type HistogramData,
+  type Time,
 } from 'lightweight-charts';
 import { fetchOHLCV } from '@/lib/birdeye';
 
@@ -30,6 +33,7 @@ export default function TokenChart({ address }: TokenChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<any>(null);
+  const volumeSeriesRef = useRef<any>(null);
   const [timeframe, setTimeframe] = useState<Timeframe>('24H');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,9 +61,27 @@ export default function TokenChart({ address }: TokenChartProps) {
         close: parseFloat(item.c ?? item.close ?? 0),
       })).sort((a, b) => (a.time as number) - (b.time as number));
 
-      if (!chartRef.current || !candleSeriesRef.current || !containerRef.current) return;
+      // Volume histogram: green for up-candles, red for down.
+      const volume: HistogramData<Time>[] = candles.map((c) => ({
+        time: c.time,
+        value: 0, // filled below
+        color: c.close >= c.open ? 'rgba(0, 200, 83, 0.35)' : 'rgba(255, 23, 68, 0.35)',
+      }));
+
+      // Map Birdeye volume field (`v`) onto each candle by time.
+      const volByTime = new Map<number, number>();
+      items.forEach((item: any) => {
+        const t = item.unixTime as number;
+        volByTime.set(t, parseFloat(item.v ?? item.volume ?? 0));
+      });
+      volume.forEach((v) => {
+        v.value = volByTime.get(v.time as number) ?? 0;
+      });
+
+      if (!chartRef.current || !candleSeriesRef.current || !volumeSeriesRef.current) return;
 
       candleSeriesRef.current.setData(candles);
+      volumeSeriesRef.current.setData(volume);
 
       // Fit the chart to show all data
       chartRef.current.timeScale().fitContent();
@@ -105,6 +127,7 @@ export default function TokenChart({ address }: TokenChartProps) {
       rightPriceScale: {
         borderColor: '#1F1F1F',
         textColor: '#A0A0A0',
+        scaleMargins: { top: 0.08, bottom: 0.28 }, // leave room for volume pane
       },
       timeScale: {
         borderColor: '#1F1F1F',
@@ -116,7 +139,8 @@ export default function TokenChart({ address }: TokenChartProps) {
 
     chartRef.current = chart;
 
-    const candleSeries = chart.addCandlestickSeries({
+    // Candlesticks — main pane (pane index 0)
+    const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#00C853',
       downColor: '#FF1744',
       borderUpColor: '#00C853',
@@ -124,8 +148,21 @@ export default function TokenChart({ address }: TokenChartProps) {
       wickUpColor: '#00C853',
       wickDownColor: '#FF1744',
     });
-
     candleSeriesRef.current = candleSeries;
+
+    // Volume histogram — separate bottom pane (pane index 1)
+    const volumeSeries = chart.addSeries(
+      HistogramSeries,
+      {
+        priceFormat: { type: 'volume' },
+        priceScaleId: '', // own overlay scale in the pane
+      },
+      1,
+    );
+    volumeSeries.priceScale().applyOptions({
+      scaleMargins: { top: 0.7, bottom: 0 },
+    });
+    volumeSeriesRef.current = volumeSeries;
 
     // Handle resize
     const resizeObserver = new ResizeObserver((entries) => {
@@ -141,12 +178,13 @@ export default function TokenChart({ address }: TokenChartProps) {
       chart.remove();
       chartRef.current = null;
       candleSeriesRef.current = null;
+      volumeSeriesRef.current = null;
     };
   }, []);
 
   // Load data when chart is ready or timeframe/address changes
   useEffect(() => {
-    if (chartRef.current && candleSeriesRef.current) {
+    if (chartRef.current && candleSeriesRef.current && volumeSeriesRef.current) {
       loadChart(timeframe);
     }
   }, [timeframe, address, loadChart]);
