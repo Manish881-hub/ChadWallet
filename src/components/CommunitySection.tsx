@@ -6,7 +6,7 @@ export default function CommunitySection() {
     <section className="relative overflow-hidden">
       <div className="relative h-[700px] sm:h-[900px] md:h-[1100px] lg:h-[1400px] w-full">
         <Image
-          src="/flow/legends.webp"
+          src="/landingpage/legends.webp"
           alt=""
           fill
           className="object-cover"
@@ -40,7 +40,7 @@ export default function CommunitySection() {
           "
         >
           <Image
-            src="/flow/outer-circle.webp"
+            src="/landingpage/outer-circle.webp"
             alt=""
             width={1000}
             height={1000}
@@ -57,7 +57,7 @@ export default function CommunitySection() {
           />
 
           <Image
-            src="/flow/inner-circle.webp"
+            src="/landingpage/inner-circle.webp"
             alt=""
             width={650}
             height={650}
@@ -85,7 +85,7 @@ export default function CommunitySection() {
             h-full
           "
         >
-          <h2
+          <h1
             className="
               text-center
               text-white
@@ -104,7 +104,7 @@ export default function CommunitySection() {
             a trading app
             <br />
             for the rest of us
-          </h2>
+          </h1>
 
           <p
             className="
