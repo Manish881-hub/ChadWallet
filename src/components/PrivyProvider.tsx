@@ -1,6 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
+import OAuthCallbackHandler from './OAuthCallbackHandler';
 
 export function Providers({
   children,
@@ -20,6 +21,7 @@ export function Providers({
         },
       }}
     >
+      <OAuthCallbackHandler />
       {children}
     </PrivyProvider>
   );

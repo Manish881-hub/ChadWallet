@@ -27,18 +27,18 @@ const GoogleIcon = () => (
 );
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const handleError = useCallback((error: any) => {
+    if (error === 'exited_auth_flow') {
+      logger.warn('OAuth flow cancelled by user');
+    } else {
+      logger.error('OAuth login error', { error });
+    }
+  }, []);
+
+  // onComplete is intentionally omitted here — OAuthCallbackHandler (mounted
+  // globally in PrivyProvider) owns the redirect after the OAuth round-trip.
   const { initOAuth } = useLoginWithOAuth({
-    onComplete: useCallback(() => {
-      onClose();
-      window.location.href = `/trade/${DEFAULT_TRADE_ADDRESS}`;
-    }, [onClose]),
-    onError: (error: any) => {
-      if (error === 'exited_auth_flow') {
-        logger.warn('OAuth flow cancelled by user');
-      } else {
-        logger.error('OAuth login error', { error });
-      }
-    },
+    onError: handleError,
   });
 
   // Close on escape key
