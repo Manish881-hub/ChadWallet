@@ -34,7 +34,11 @@ export default function LiveTrades({ address }: LiveTradesProps) {
   const [error, setError] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const isLoadingRef = useRef(false);
+
   const loadTrades = useCallback(async () => {
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
     try {
       const data = await fetchTokenTrades(address, 50);
       if (data && data.length > 0) {
@@ -48,17 +52,24 @@ export default function LiveTrades({ address }: LiveTradesProps) {
       setError('Failed to load trades');
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
     }
   }, [address, trades.length]);
 
   useEffect(() => {
     loadTrades();
 
-    // Auto-refresh every 5 seconds
-    timerRef.current = setInterval(loadTrades, 5_000);
+    // Auto-refresh every 30s (Birdeye free tier is rate-limited)
+    const poll = () => {
+      timerRef.current = setTimeout(async () => {
+        await loadTrades();
+        poll();
+      }, 30_000);
+    };
+    poll();
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [loadTrades]);
 

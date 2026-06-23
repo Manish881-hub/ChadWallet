@@ -5,7 +5,7 @@ import { NetworkError } from './errors';
 
 const BIRDEYE_API_KEY = process.env.NEXT_PUBLIC_BIRDEYE_API_KEY!;
 const BIRDEYE_BASE_URL = 'https://public-api.birdeye.so';
-const REQUEST_TIMEOUT = 10_000;
+const REQUEST_TIMEOUT = 15_000;
 const MAX_RETRIES = 3;
 const RETRY_429_DELAY = 5_000;
 
