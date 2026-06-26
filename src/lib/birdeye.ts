@@ -15,23 +15,29 @@ const birdeyeClient: AxiosInstance = axios.create({
   timeout: REQUEST_TIMEOUT,
 });
 
-// ── Sliding-window rate limiter ─────────────────────────────────────
-// Birdeye free tier: ~10 req/min. We allow bursts up to 8/60s.
-const requestTimestamps: number[] = [];
-const MAX_REQUESTS_PER_WINDOW = 8;
-const WINDOW_MS = 60_000;
+// ── Serial request queue ────────────────────────────────────────────
+// Birdeye free tier: ~10 req/min. We enforce a minimum gap between
+// requests via a serial promise chain — no race conditions possible.
+const MIN_GAP_MS = 7_500; // ~8 req/min
+let lastRequestTime = 0;
+let queue: Promise<void> = Promise.resolve();
 
 async function throttle<T>(fn: () => Promise<T>): Promise<T> {
-  const now = Date.now();
-  while (requestTimestamps.length > 0 && requestTimestamps[0] < now - WINDOW_MS) {
-    requestTimestamps.shift();
-  }
-  if (requestTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    const waitTime = requestTimestamps[0] + WINDOW_MS - now + 100;
-    await new Promise(r => setTimeout(r, waitTime));
-  }
-  requestTimestamps.push(Date.now());
-  return fn();
+  return new Promise<T>((resolve, reject) => {
+    queue = queue.then(async () => {
+      const now = Date.now();
+      const elapsed = now - lastRequestTime;
+      if (elapsed < MIN_GAP_MS) {
+        await new Promise(r => setTimeout(r, MIN_GAP_MS - elapsed));
+      }
+      lastRequestTime = Date.now();
+      try {
+        resolve(await fn());
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 // ── In-memory cache with stale-while-revalidate ────────────────────
@@ -142,6 +148,7 @@ export async function fetchTrendingTokens(): Promise<any[]> {
       const items = data?.data?.tokens ?? data?.data?.items ?? data?.data ?? [];
       return Array.isArray(items) ? items.map(normalizeToken) : [];
     } catch (err: any) {
+      if (err?.response?.status === 429) throw err;
       logger.error('fetchTrendingTokens failed', { error: err?.message });
       return getCached<any[]>('trending') ?? [];
     }
@@ -156,6 +163,8 @@ export async function fetchTokenOverview(address: string): Promise<any | null> {
       });
       return data?.data ? normalizeToken(data.data) : null;
     } catch (err: any) {
+      // Let 429s bubble up to dedupedFetch for retry with backoff
+      if (err?.response?.status === 429) throw err;
       logger.error('fetchTokenOverview failed', { address, error: err?.message });
       return getCached<any>(`overview:${address}`) ?? null;
     }
@@ -175,6 +184,7 @@ export async function fetchOHLCV(
       });
       return data?.data?.items ?? [];
     } catch (err: any) {
+      if (err?.response?.status === 429) throw err;
       logger.error('fetchOHLCV failed', { address, type, error: err?.message });
       return [];
     }
@@ -189,6 +199,7 @@ export async function fetchTokenTrades(address: string, limit = 50): Promise<any
       });
       return data?.data?.items ?? [];
     } catch (err: any) {
+      if (err?.response?.status === 429) throw err;
       logger.error('fetchTokenTrades failed', { address, error: err?.message });
       return [];
     }
@@ -209,6 +220,7 @@ export async function fetchSparkline(address: string, points = 20): Promise<numb
       const sliced = closes.length > points ? closes.slice(-points) : closes;
       return sliced.filter(v => v > 0);
     } catch (err: any) {
+      if (err?.response?.status === 429) throw err;
       logger.warn('fetchSparkline failed', { address, error: err?.message });
       return [];
     }
