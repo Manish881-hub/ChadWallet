@@ -114,7 +114,7 @@ export default function ProfileMenu() {
                 Settings
               </button>
               <button 
-                onClick={() => { logout(); setIsOpen(false); }} 
+                onClick={() => { logout(); setIsOpen(false); window.location.href = '/'; }} 
                 role="menuitem"
                 className="flex items-center gap-3 px-3 py-2 hover:bg-[#FF1744]/10 text-[#FF1744] rounded-lg transition-colors text-sm w-full text-left mt-1"
               >

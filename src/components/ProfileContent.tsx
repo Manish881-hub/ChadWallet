@@ -86,7 +86,7 @@ export default function ProfileContent() {
                 Log In
               </button>
             ) : (
-              <button onClick={() => logout()} className="px-4 py-2 border border-[#1F1F1F] bg-[#111111] hover:bg-[#FF1744]/10 hover:text-[#FF1744] hover:border-[#FF1744]/30 rounded-lg text-sm font-semibold transition-colors">
+              <button onClick={() => { logout(); window.location.href = '/'; }} className="px-4 py-2 border border-[#1F1F1F] bg-[#111111] hover:bg-[#FF1744]/10 hover:text-[#FF1744] hover:border-[#FF1744]/30 rounded-lg text-sm font-semibold transition-colors">
                 Sign Out
               </button>
             )}
