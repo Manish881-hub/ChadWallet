@@ -1,22 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
+import { brand } from '@/lib/brand';
 
 export default function CommunitySection() {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-x-clip">
       <div className="relative h-[700px] sm:h-[900px] md:h-[1100px] lg:h-[1400px] w-full">
         <div
           className="
             absolute
             inset-0
             bg-gradient-to-b
-            from-[#050816]
+            from-transparent
             via-[#2E3192]/20
             to-[#040611]
           "
         />
 
-        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 40%)' }} />
 
         <Image
           src="/landingpage/legends.webp"
@@ -24,8 +25,8 @@ export default function CommunitySection() {
           fill
           className="object-cover"
           style={{
-            maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 60%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 60%, transparent 100%)'
           }}
           priority
         />
@@ -40,7 +41,7 @@ export default function CommunitySection() {
           "
         >
           <Image
-            src="/landingpage/outer-circle.webp"
+            src="/landingpage/outer_circle.webp"
             alt=""
             width={1000}
             height={1000}
@@ -130,7 +131,9 @@ export default function CommunitySection() {
             </Link>
 
             <a
-              href="#"
+              href={brand.appStore.ios}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-2xl border border-white/10 transition-all"
             >
               Download app

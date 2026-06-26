@@ -20,7 +20,7 @@ export default function DeviceShowcaseSection() {
   }, []);
 
   return (
-    <section className="relative py-20 sm:py-24 md:py-32 px-4 sm:px-6 overflow-visible z-20">
+    <section className="relative pt-4 pb-8 sm:py-24 md:py-32 px-4 sm:px-6 overflow-visible z-20">
       <div className="max-w-6xl mx-auto">
         <div className="relative flex items-center justify-center">
 

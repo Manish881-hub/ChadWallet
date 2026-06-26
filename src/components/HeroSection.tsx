@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { brand } from '@/lib/brand';
 
 export default function HeroSection() {
   return (
@@ -13,7 +14,7 @@ export default function HeroSection() {
           maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
           WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
         }}
-        src="/landingpage/space-bg.webp"
+        src="/landingpage/space-desktop.webp"
       />
 
       <div className="relative z-10 flex flex-col items-center text-center px-6 gap-5 md:gap-8">
@@ -23,10 +24,10 @@ export default function HeroSection() {
             ChadWallet
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-white">
-            where traders become legends.
+            {brand.tagline}
           </h1>
           <p className="mt-4 text-base sm:text-lg lg:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
-            From memecoins to viral tokens, trade any crypto in seconds.
+            Trade SOL, BTC, ETH, and 10,000+ tokens in seconds.
           </p>
         </div>
 
@@ -38,7 +39,9 @@ export default function HeroSection() {
             Start trading
           </Link>
           <a
-            href="#"
+            href={brand.appStore.ios}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl border border-white/10 transition-all text-sm sm:text-base"
           >
             Download app
