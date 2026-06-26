@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SignInButton from "./SignInButton";
+import { brand } from "@/lib/brand";
 
 const AppleIcon = () => (
   <svg viewBox="0 0 384 512" width="20" height="20" fill="currentColor">
@@ -21,7 +22,7 @@ export default function Header() {
     <header className="absolute top-0 left-0 w-full z-50 flex items-center h-16 pt-3 px-4 sm:px-5 justify-between">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 shrink-0">
-        <img src="/logo/dark.png" alt="ChadWallet Logo" className="w-8 h-8 object-contain" />
+
         <span className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-white">
           ChadWallet
         </span>
@@ -31,7 +32,7 @@ export default function Header() {
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
         {/* Apple App Store — icon only on mobile, full label on md+ */}
         <a
-          href="https://apps.apple.com/us/app/chadwallet/id6757367474"
+          href={brand.appStore.ios}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Download on the App Store"
@@ -46,7 +47,7 @@ export default function Header() {
 
         {/* Google Play Store — icon only on mobile, full label on md+ */}
         <a
-          href="https://play.google.com/store/apps/details?id=xyz.chadwallet.www&pli=1"
+          href={brand.appStore.android}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Get it on Google Play"
