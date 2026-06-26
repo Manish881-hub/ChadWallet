@@ -20,10 +20,10 @@ export default function HeroSection() {
       <div className="relative z-10 flex flex-col items-center text-center px-6 gap-5 md:gap-8">
         <div className="flex flex-col gap-2 items-center text-center w-full max-w-4xl animate-fade-up">
           {/* Giant Logo */}
-          <div className="text-[90px] sm:text-[140px] lg:text-[180px] xl:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none font-display">
+          <div className="text-[72px] sm:text-[140px] lg:text-[180px] xl:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none ">
             ChadWallet
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-white font-display">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-white ">
             {brand.tagline}
           </h1>
           <p className="mt-4 text-base sm:text-lg lg:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">
@@ -49,11 +49,11 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Astronaut - Now in document flow with negative top margin */}
+      {/* Astronaut - Now in document flow with adjusted top margin for mobile */}
       <img
         src="/landingpage/astronaut-mobile.webp"
         alt="Astronaut"
-        className="w-[240px] sm:w-[300px] lg:w-[380px] xl:w-[450px] max-w-[85vw] object-contain animate-[float_6s_ease-in-out_infinite] -mt-10 md:-mt-20 z-0 relative pointer-events-none"
+        className="w-[240px] sm:w-[300px] lg:w-[380px] xl:w-[450px] max-w-[85vw] object-contain animate-[float_6s_ease-in-out_infinite] mt-8 mb-8 md:mb-0 md:-mt-20 z-0 relative pointer-events-none"
       />
 
       {/* Decorative SVGs */}

@@ -96,7 +96,7 @@ export default function Footer() {
                 alt={brand.name}
                 className="w-10 h-10 rounded-xl"
               />
-              <span className="text-white font-bold text-xl tracking-tight font-display">
+              <span className="text-white font-bold text-xl tracking-tight ">
                 {brand.name}
               </span>
             </div>
@@ -238,7 +238,7 @@ export default function Footer() {
 
         {/* ── Bottom bar: copyright + social icons ─────────────────── */}
         <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-6 pt-8">
-          <p className="text-[13px] text-[#6B7280]">
+          <p className="text-[13px] text-[#9CA3AF]">
             &copy; {new Date().getFullYear()} {brand.name} Inc. All rights reserved.
           </p>
 
@@ -257,7 +257,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
-                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#6B7280] hover:text-white hover:bg-white/[0.06] transition-all duration-200"
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-[#9CA3AF] hover:text-white hover:bg-white/[0.06] transition-all duration-200"
               >
                 {s.icon}
               </a>

@@ -77,7 +77,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="touch-target absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
@@ -86,7 +86,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
           {/* Logo & Text */}
           <div className="mb-8">
-            <h2 className="text-4xl font-bold text-white tracking-tighter mb-4 font-display">
+            <h2 className="text-4xl font-bold text-white tracking-tighter mb-4 ">
               ChadWallet
             </h2>
             <p className="text-gray-300 text-[15px] max-w-[240px] mx-auto leading-tight">
@@ -124,7 +124,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
 
           {/* Footer Text */}
-          <p className="text-[#555a73] text-[11px] leading-relaxed max-w-[260px] mx-auto">
+          <p className="text-[#888a73] text-[11px] leading-relaxed max-w-[260px] mx-auto">
             By signing up, you agree to our Terms of Service<br />and Privacy Policy.
           </p>
         </div>

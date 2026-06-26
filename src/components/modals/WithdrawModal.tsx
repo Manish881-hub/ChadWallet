@@ -58,7 +58,7 @@ export default function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
                  <label className="text-xs font-bold text-[#A0A0A0]">Amount (SOL)</label>
-                 <span className="text-[10px] text-[#555]">Balance: 4.20 SOL</span>
+                 <span className="text-[10px] text-[#888]">Balance: 4.20 SOL</span>
               </div>
               <div className="relative">
                 <input 

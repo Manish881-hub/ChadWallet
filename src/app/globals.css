@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-body);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-mono);
   --color-primary: #6366F1;
   --color-dark: #050816;
@@ -284,6 +283,51 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ── Desktop no-scrollbar override (show scrollbars on mobile) ── */
+
+@media (max-width: 640px) {
+  .no-scrollbar.desktop-only-scroll {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    overflow-x: auto;
+  }
+  .no-scrollbar.desktop-only-scroll::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    display: block;
+  }
+  .no-scrollbar.desktop-only-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(57, 255, 20, 0.2);
+    border-radius: 9999px;
+  }
+}
+
+/* ── Minimum touch target (44×44) for mobile ──────────────────── */
+
+@media (max-width: 640px) {
+  .touch-target {
+    position: relative;
+  }
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    inset: calc((44px - 100%) / -2);
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ── Safe area insets (iPhone notch / home indicator) ─────────── */
+
+.safe-area-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-area-top {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
 }
 
 /* ── No scrollbar utility ──────────────────────────────────────── */

@@ -113,7 +113,7 @@ export default function TradeHeader() {
       <div className="flex items-center w-full gap-3">
         {/* Left — Logo */}
         <Link href="/" className="flex items-center shrink-0">
-          <img src="/logo/dark.png" alt="Logo" className="w-auto h-5 object-contain" />
+          <img src="/logo/dark.png" alt="ChadWallet" width={20} height={20} className="w-auto h-5 object-contain" />
         </Link>
         {/* Center — Search (command palette) */}
         <div className="relative flex-1 max-w-[400px] hidden sm:block mx-auto">
@@ -121,7 +121,7 @@ export default function TradeHeader() {
             <div className={`flex h-7 items-center gap-1.5 rounded-md border ${
               isFocused ? 'border-[#39FF14]/60' : 'border-[#1F1F1F]'
             } bg-[#111111] px-2 transition-colors`}>
-              <svg className="w-3.5 h-3.5 shrink-0 text-[#555]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 shrink-0 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -131,13 +131,14 @@ export default function TradeHeader() {
                 onChange={e => setSearch(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search tokens... ( / )"
-                className="flex-1 bg-transparent text-xs text-white outline-none placeholder:text-[#555] font-mono"
+                aria-label="Search tokens"
+                className="flex-1 bg-transparent text-xs text-white outline-none placeholder:text-[#888] font-mono"
               />
               {isFocused && (
                 <div className="flex items-center gap-1">
-                  <kbd className="text-[8px] font-mono text-[#555] bg-[#1F1F1F] px-1 rounded">↑↓</kbd>
-                  <kbd className="text-[8px] font-mono text-[#555] bg-[#1F1F1F] px-1 rounded">↵</kbd>
-                  <button onClick={() => { setIsFocused(false); setHighlightIndex(0); }} className="text-[9px] font-mono font-bold text-[#A0A0A0] hover:text-white">
+                  <kbd className="text-[8px] font-mono text-[#888] bg-[#1F1F1F] px-1 rounded">↑↓</kbd>
+                  <kbd className="text-[8px] font-mono text-[#888] bg-[#1F1F1F] px-1 rounded">↵</kbd>
+                  <button onClick={() => { setIsFocused(false); setHighlightIndex(0); }} className="touch-target text-[9px] font-mono font-bold text-[#A0A0A0] hover:text-white">
                     ESC
                   </button>
                 </div>
@@ -149,13 +150,13 @@ export default function TradeHeader() {
               <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-[#1F1F1F] bg-[#111111] overflow-hidden shadow-2xl z-50">
                 <div className="px-3 py-1.5 text-[10px] text-[#A0A0A0] font-mono border-b border-[#1F1F1F] flex items-center gap-2">
                   <span>{search ? 'Results' : 'Trending'}</span>
-                  <span className="ml-auto text-[#555]">
+                  <span className="ml-auto text-[#888]">
                     {filteredTokens.length > 0 && `${highlightIndex + 1}/${Math.min(filteredTokens.length, 12)}`}
                   </span>
                 </div>
                 <div className="max-h-[360px] overflow-y-auto scrollbar-thin">
                   {filteredTokens.length === 0 ? (
-                    <div className="p-4 text-center text-[#555] text-xs font-mono">No tokens found</div>
+                    <div className="p-4 text-center text-[#888] text-xs font-mono">No tokens found</div>
                   ) : (
                     filteredTokens.slice(0, 12).map((token, i) => {
                       const change = token.price_change_24h_percent ?? 0;
@@ -180,7 +181,7 @@ export default function TradeHeader() {
                             <span className="text-[#39FF14] text-[10px] font-mono">▸</span>
                           )}
                           {token.logo_uri ? (
-                            <img src={token.logo_uri} className="w-6 h-6 rounded-full shrink-0" alt={token.symbol} />
+                            <img src={token.logo_uri} width={24} height={24} className="w-6 h-6 rounded-full shrink-0" alt={token.symbol} loading="lazy" />
                           ) : (
                             <div className="w-6 h-6 rounded-full bg-[#1F1F1F] flex items-center justify-center text-[9px] font-bold text-[#A0A0A0] shrink-0">
                               {(token.symbol ?? '?').slice(0, 2)}
@@ -188,7 +189,7 @@ export default function TradeHeader() {
                           )}
                           <div className="flex flex-col min-w-0 flex-1">
                             <span className="text-xs font-bold text-white truncate">{token.symbol}</span>
-                            <span className="text-[9px] text-[#555] font-mono truncate">{token.name}</span>
+                            <span className="text-[9px] text-[#888] font-mono truncate">{token.name}</span>
                           </div>
                           <span className="text-xs font-bold text-white font-mono tabular-nums shrink-0">
                             {formatPrice(token.price)}

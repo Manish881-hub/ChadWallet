@@ -1,11 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useTokenBalances } from '@/lib/useTokenBalances';
 import LoginModal from './LoginModal';
 
 type SwapsTab = 'All swaps' | 'Buys' | 'Sells';
 type PositionsTab = 'Recent' | 'Open' | 'Closed';
+type Timeframe = '24H' | '7D' | '30D' | 'ALL';
 
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
 
@@ -14,6 +15,7 @@ export default function ProfileContent() {
   const [swapsTab, setSwapsTab] = useState<SwapsTab>('All swaps');
   const [positionsTab, setPositionsTab] = useState<PositionsTab>('Closed');
   const [loginOpen, setLoginOpen] = useState(false);
+  const [timeframe, setTimeframe] = useState<Timeframe>('24H');
 
   // We fetch SOL balance as a demo of real cash balance
   const { sol } = useTokenBalances(SOL_MINT);
@@ -51,15 +53,15 @@ export default function ProfileContent() {
             <span className="text-[#A0A0A0] text-sm">{displayHandle}</span>
             <div className="flex items-center gap-4 mt-2">
               <div className="flex items-baseline gap-1 text-[11px]">
-                <svg className="w-3.5 h-3.5 text-[#555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg className="w-3.5 h-3.5 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span className="text-[#A0A0A0]">No hold time</span>
               </div>
               <div className="flex items-baseline gap-1 text-[11px]">
-                <svg className="w-3.5 h-3.5 text-[#555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                <svg className="w-3.5 h-3.5 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
                 <span className="text-[#A0A0A0]">0 trades</span>
               </div>
               <div className="flex items-baseline gap-1 text-[11px]">
-                <svg className="w-3.5 h-3.5 text-[#555]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <svg className="w-3.5 h-3.5 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <span className="text-[#A0A0A0]">Joined Jun 2026</span>
               </div>
             </div>
@@ -88,7 +90,11 @@ export default function ProfileContent() {
                 Sign Out
               </button>
             )}
-            <button className="w-9 h-9 flex items-center justify-center border border-[#1F1F1F] bg-[#111111] hover:bg-white/5 rounded-lg transition-colors">
+            <button
+              onClick={() => { navigator.clipboard.writeText(window.location.href); }}
+              className="w-9 h-9 flex items-center justify-center border border-[#1F1F1F] bg-[#111111] hover:bg-white/5 rounded-lg transition-colors"
+              title="Copy profile link"
+            >
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8v12"/><path d="M19 8c-2 0-3.5-1.5-3.5-3.5S17 1 19 1s3.5 1.5 3.5 3.5S21 8 19 8z"/><path d="M5 8c2 0 3.5-1.5 3.5-3.5S7 1 5 1 1.5 2.5 1.5 4.5 3 8 5 8z"/>
               </svg>
@@ -104,8 +110,12 @@ export default function ProfileContent() {
           {/* Cash Balance Card */}
           <div className="bg-[#111111] border border-[#1F1F1F] rounded-xl p-5 flex flex-col h-[200px] relative">
             <div className="absolute top-4 right-4 flex gap-1">
-              {['24H', '7D', '30D', 'ALL'].map(t => (
-                <button key={t} className={`px-2 py-1 text-[10px] font-mono font-bold rounded ${t === '24H' ? 'bg-white/10 text-white' : 'text-[#6B7280] hover:text-white'}`}>
+              {(['24H', '7D', '30D', 'ALL'] as Timeframe[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTimeframe(t)}
+                  className={`px-2 py-1 text-[10px] font-mono font-bold rounded ${timeframe === t ? 'bg-white/10 text-white' : 'text-[#9CA3AF] hover:text-white'}`}
+                >
                   {t}
                 </button>
               ))}
@@ -128,12 +138,18 @@ export default function ProfileContent() {
                    <span className="text-[13px] font-bold text-white tabular-nums">${sol > 0 ? (sol * 150).toFixed(2) : '0'}</span>
                  </div>
                </div>
-               <button className="px-4 py-2 border border-[#1F1F1F] hover:bg-white/5 text-[12px] font-semibold rounded-lg transition-colors">
-                 Withdraw
-               </button>
-               <button className="px-4 py-2 bg-[#4D62FF] hover:bg-[#3D52E5] text-white text-[12px] font-semibold rounded-lg transition-colors">
-                 Deposit
-               </button>
+               <button
+                  onClick={() => alert('Withdraw functionality coming soon')}
+                  className="px-4 py-2 border border-[#1F1F1F] hover:bg-white/5 text-[12px] font-semibold rounded-lg transition-colors"
+                >
+                  Withdraw
+                </button>
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-deposit-modal'))}
+                  className="px-4 py-2 bg-[#4D62FF] hover:bg-[#3D52E5] text-white text-[12px] font-semibold rounded-lg transition-colors"
+                >
+                  Deposit
+                </button>
             </div>
           </div>
 
@@ -143,7 +159,7 @@ export default function ProfileContent() {
                 <span className="text-[13px] font-bold text-white">Your positions</span>
                 <div className="flex gap-2">
                   {['Recent', 'Open', 'Closed'].map(t => (
-                    <button key={t} onClick={() => setPositionsTab(t as PositionsTab)} className={`text-[11px] font-semibold flex items-center gap-1 ${positionsTab === t ? 'text-white' : 'text-[#6B7280] hover:text-[#A0A0A0]'}`}>
+                    <button key={t} onClick={() => setPositionsTab(t as PositionsTab)} className={`text-[11px] font-semibold flex items-center gap-1 ${positionsTab === t ? 'text-white' : 'text-[#9CA3AF] hover:text-[#A0A0A0]'}`}>
                       {positionsTab === t && <span className="w-1 h-3 bg-white/20 rounded-full" />}
                       {t}
                     </button>
@@ -152,12 +168,12 @@ export default function ProfileContent() {
              </div>
              
              <div className="flex items-center px-4 py-2 border-b border-[#1F1F1F]/50">
-                <span className="text-[11px] text-[#6B7280] font-mono flex-1">Token</span>
-                <span className="text-[11px] text-[#6B7280] font-mono">PnL</span>
+                <span className="text-[11px] text-[#9CA3AF] font-mono flex-1">Token</span>
+                <span className="text-[11px] text-[#9CA3AF] font-mono">PnL</span>
              </div>
 
              <div className="flex-1 flex flex-col items-center justify-center gap-2 opacity-50">
-                <span className="text-sm font-mono text-[#555]">No closed positions</span>
+                <span className="text-sm font-mono text-[#888]">No closed positions</span>
              </div>
           </div>
         </div>
@@ -167,20 +183,20 @@ export default function ProfileContent() {
            <div className="bg-[#111111] border border-[#1F1F1F] rounded-xl h-full flex flex-col overflow-hidden">
               <div className="flex items-center gap-4 px-4 py-3 border-b border-[#1F1F1F]">
                 {(['All swaps', 'Buys', 'Sells'] as SwapsTab[]).map(t => (
-                  <button key={t} onClick={() => setSwapsTab(t)} className={`text-[13px] font-bold transition-colors ${swapsTab === t ? 'text-white' : 'text-[#6B7280] hover:text-[#A0A0A0]'}`}>
+                  <button key={t} onClick={() => setSwapsTab(t)} className={`text-[13px] font-bold transition-colors ${swapsTab === t ? 'text-white' : 'text-[#9CA3AF] hover:text-[#A0A0A0]'}`}>
                     {t}
                   </button>
                 ))}
               </div>
               <div className="flex items-center px-4 py-2 border-b border-[#1F1F1F]/50">
-                 <span className="text-[11px] text-[#6B7280] font-mono w-24">Token</span>
-                 <span className="text-[11px] text-[#6B7280] font-mono w-16">Action</span>
-                 <span className="text-[11px] text-[#6B7280] font-mono flex-1 text-right">Amount</span>
-                 <span className="text-[11px] text-[#6B7280] font-mono flex-1 text-right flex items-center justify-end gap-1">MCap <span className="text-[8px]">▼</span></span>
-                 <span className="text-[11px] text-[#6B7280] font-mono w-16 text-right">Time</span>
+                 <span className="text-[11px] text-[#9CA3AF] font-mono w-24">Token</span>
+                 <span className="text-[11px] text-[#9CA3AF] font-mono w-16">Action</span>
+                 <span className="text-[11px] text-[#9CA3AF] font-mono flex-1 text-right">Amount</span>
+                 <span className="text-[11px] text-[#9CA3AF] font-mono flex-1 text-right flex items-center justify-end gap-1">MCap <span className="text-[8px]">▼</span></span>
+                 <span className="text-[11px] text-[#9CA3AF] font-mono w-16 text-right">Time</span>
               </div>
               <div className="flex-1 flex flex-col items-center justify-center gap-2 opacity-50">
-                <span className="text-sm font-mono text-[#555]">No trades yet</span>
+                <span className="text-sm font-mono text-[#888]">No trades yet</span>
               </div>
            </div>
         </div>

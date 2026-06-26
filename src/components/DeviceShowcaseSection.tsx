@@ -55,7 +55,7 @@ export default function DeviceShowcaseSection() {
             </div>
 
             {/* Mobile Phone Overlay */}
-            <div className="absolute -bottom-6 right-2 sm:-bottom-8 sm:-right-2 md:-bottom-12 md:-right-12 w-[38%] sm:w-[40%] md:w-64 max-w-[180px] sm:max-w-none rounded-3xl sm:rounded-[2.5rem] border-[4px] sm:border-[6px] border-[#1a1c29] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] bg-black transform transition-transform duration-700 hover:-translate-y-6 hover:-rotate-2 hover:scale-105 z-30 cursor-pointer">
+            <div className="absolute -bottom-6 right-2 sm:-bottom-8 sm:-right-2 md:-bottom-12 md:-right-12 w-[38%] sm:w-[40%] md:w-64 max-w-[180px] sm:max-w-none rounded-3xl sm:rounded-[2.5rem] border-[4px] sm:border-[6px] border-[#1a1c29] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] bg-black transform transition-transform duration-700 hover:-translate-y-6 hover:-rotate-2 hover:scale-105 z-30">
               <div className="relative aspect-[9/19] bg-black">
                 {/* iPhone Dynamic Island / Notch */}
                 <div className="absolute top-0 inset-x-0 h-6 flex justify-center z-30">

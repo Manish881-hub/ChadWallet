@@ -40,7 +40,7 @@ export default function PortfolioSection() {
           <button 
             key={t} 
             onClick={() => setTimeframe(t)}
-            className={`px-2 py-1 text-[10px] font-mono font-bold rounded transition-colors ${timeframe === t ? 'bg-white/10 text-white' : 'text-[#6B7280] hover:text-white'}`}
+            className={`px-2 py-1 text-[10px] font-mono font-bold rounded transition-colors ${timeframe === t ? 'bg-white/10 text-white' : 'text-[#9CA3AF] hover:text-white'}`}
           >
             {t}
           </button>

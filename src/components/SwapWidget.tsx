@@ -240,18 +240,23 @@ export default function SwapWidget({
   const impactLevel = priceImpact > 5 ? 'high' : priceImpact > 1 ? 'medium' : 'low';
 
   return (
-    <div className="flex flex-col gap-3 p-3 overflow-y-auto scrollbar-thin">
+    <div className="flex flex-col gap-3 p-3 overflow-y-auto scrollbar-thin" id="swap-panel" role="tabpanel" aria-labelledby={`swap-tab-${mode}`}>
       {/* Market cap */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-mono text-[#6B7280] uppercase tracking-wider">Market cap</span>
+        <span className="text-[10px] font-mono text-[#9CA3AF] uppercase tracking-wider">Market cap</span>
         <span className="text-lg font-mono font-bold text-white tabular-nums">
           {formatUSD(marketCap ?? 0)}
         </span>
       </div>
 
       {/* Buy / Sell tabs */}
-      <div className="flex rounded-lg overflow-hidden border border-[#1F1F1F]">
+      <div className="flex rounded-lg overflow-hidden border border-[#1F1F1F]" role="tablist" aria-label="Swap mode">
         <button
+          role="tab"
+          aria-selected={mode === 'buy'}
+          aria-controls="swap-panel"
+          id="swap-tab-buy"
+          tabIndex={mode === 'buy' ? 0 : -1}
           onClick={() => { setMode('buy'); setQuote(null); setTxSignature(null); setError(null); setUsdAmount(''); setActivePreset(null); }}
           className={`flex-1 py-2.5 text-sm font-bold transition-all duration-200 press-scale ${
             mode === 'buy'
@@ -262,6 +267,11 @@ export default function SwapWidget({
           Buy
         </button>
         <button
+          role="tab"
+          aria-selected={mode === 'sell'}
+          aria-controls="swap-panel"
+          id="swap-tab-sell"
+          tabIndex={mode === 'sell' ? 0 : -1}
           onClick={() => { setMode('sell'); setQuote(null); setTxSignature(null); setError(null); setUsdAmount(''); setActivePreset(null); }}
           className={`flex-1 py-2.5 text-sm font-bold transition-all duration-200 press-scale ${
             mode === 'sell'
@@ -288,6 +298,7 @@ export default function SwapWidget({
             ref={inputRef}
             type="number"
             placeholder="0"
+            aria-label="USD amount"
             value={usdAmount}
             onChange={e => {
               setUsdAmount(e.target.value);
@@ -298,13 +309,13 @@ export default function SwapWidget({
             }}
             className="flex-1 bg-transparent text-xl font-mono font-bold text-white tabular-nums outline-none placeholder:text-[#333] w-0 min-w-0"
           />
-          <span className="text-xs font-mono text-[#555] ml-2 shrink-0">
+          <span className="text-xs font-mono text-[#888] ml-2 shrink-0">
             {usdAmount ? '' : 'Enter amount'}
           </span>
           {usdAmount && (
             <button
               onClick={(e) => { e.stopPropagation(); setUsdAmount(''); setQuote(null); setError(null); setActivePreset(null); }}
-              className="ml-1 text-[#555] hover:text-white transition-colors text-xs press-scale"
+              className="ml-1 text-[#888] hover:text-white transition-colors text-xs press-scale"
               title="Clear"
             >
               ✕
@@ -314,7 +325,7 @@ export default function SwapWidget({
 
         {/* SOL equivalent */}
         {usdValue > 0 && mode === 'buy' && (
-          <span className="text-[10px] font-mono text-[#555] tabular-nums px-1">
+          <span className="text-[10px] font-mono text-[#888] tabular-nums px-1">
             ≈ {solEquivalent.toFixed(6)} SOL
           </span>
         )}
@@ -377,13 +388,16 @@ export default function SwapWidget({
       </div>
 
       {/* Available balance */}
-      <button
-        onClick={handleMaxFill}
-        className="text-[11px] font-mono text-[#6B7280] hover:text-[#A0A0A0] transition-colors text-left"
-        title="Click to use max"
-      >
-        ${availableUsd.toFixed(2)} available
-      </button>
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-mono text-[#9CA3AF]">${availableUsd.toFixed(2)} available</span>
+        <button
+          onClick={handleMaxFill}
+          className="text-[10px] font-mono font-bold text-[#39FF14]/70 hover:text-[#39FF14] transition-colors press-scale"
+          aria-label="Use maximum amount"
+        >
+          Max
+        </button>
+      </div>
 
       {/* Quote summary */}
       {quote && (
@@ -403,7 +417,7 @@ export default function SwapWidget({
             </div>
           )}
           <div className="flex items-center justify-between pt-1 border-t border-[#1F1F1F]">
-            <span className="text-[9px] text-[#555] font-mono tabular-nums">{quoteAge}s ago</span>
+            <span className="text-[9px] text-[#888] font-mono tabular-nums">{quoteAge}s ago</span>
             <button
               onClick={fetchQuote}
               disabled={loading}
@@ -417,7 +431,7 @@ export default function SwapWidget({
 
       {/* Error display */}
       {error && (
-        <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#FF1744]/10 border border-[#FF1744]/20 rounded-lg animate-slide-in">
+        <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#FF1744]/10 border border-[#FF1744]/20 rounded-lg animate-slide-in" role="alert">
           <span className="text-[#FF1744] text-[10px] font-mono">{error}</span>
         </div>
       )}
@@ -441,22 +455,22 @@ export default function SwapWidget({
             : !user
               ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A]'
               : swapping || (quote ? impactLevel === 'high' : usdValue <= 0)
-                ? 'bg-[#1F1F1F] text-[#555] cursor-not-allowed'
+                ? 'bg-[#1F1F1F] text-[#888] cursor-not-allowed'
                 : mode === 'buy'
                   ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A]'
                   : 'bg-[#FF1744] text-white hover:bg-[#FF3D5C]'
         }`}
       >
         {swapping ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <span className="flex items-center justify-center gap-2" aria-live="polite">
+            <svg className="w-4 h-4 animate-spin" aria-hidden="true" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
             Swapping…
           </span>
         ) : showSuccess ? (
-          '✓ Swap successful!'
+          <span aria-live="polite">✓ Swap successful!</span>
         ) : !user ? (
           'Sign in to trade'
         ) : quote ? (
@@ -469,7 +483,7 @@ export default function SwapWidget({
       <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
 
       {/* Unverified token warning */}
-      <div className="flex items-center gap-2 px-2.5 py-2 bg-[#FFA726]/5 border border-[#FFA726]/15 rounded-lg relative">
+      <div className="flex items-center gap-2 px-2.5 py-2 bg-[#FFA726]/5 border border-[#FFA726]/15 rounded-lg relative" role="note">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFA726" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />

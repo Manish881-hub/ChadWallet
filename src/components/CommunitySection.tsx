@@ -46,8 +46,9 @@ export default function CommunitySection() {
             width={1000}
             height={1000}
             className="
-              w-[80vw]
-              max-w-[320px]
+              w-[130vw]
+              sm:w-[80vw]
+              max-w-[450px]
               sm:max-w-[480px]
               md:max-w-[680px]
               lg:max-w-[1000px]
@@ -63,8 +64,9 @@ export default function CommunitySection() {
             width={650}
             height={650}
             className="
-              w-[55vw]
-              max-w-[220px]
+              w-[90vw]
+              sm:w-[55vw]
+              max-w-[300px]
               sm:max-w-[320px]
               md:max-w-[460px]
               lg:max-w-[650px]
@@ -90,8 +92,8 @@ export default function CommunitySection() {
             className="
               text-center
               text-white
-              text-[44px]
-              leading-[1.05]
+              text-[36px]
+              leading-[1.1]
               sm:text-[56px]
               md:text-[72px]
               md:leading-[72px]
@@ -100,7 +102,7 @@ export default function CommunitySection() {
               tracking-[-0.04em]
               font-bold
               px-4
-              font-display
+              
             "
           >
             a trading app
@@ -110,9 +112,10 @@ export default function CommunitySection() {
 
           <p
             className="
-              mt-6
+              mt-4
+              sm:mt-6
               text-center
-              text-[18px]
+              text-[16px]
               sm:text-[20px]
               md:text-[22px]
               text-[#A4A9C6]
@@ -123,10 +126,10 @@ export default function CommunitySection() {
             join 500,000 traders making their name on ChadWallet
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4 px-6">
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 px-6 relative z-30">
             <Link
               href="/trade/So11111111111111111111111111111111111111112"
-              className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-8 py-3.5 rounded-2xl transition-all"
+              className="inline-flex items-center justify-center bg-[#5c67d6] hover:bg-[#4a55a2] text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl transition-all text-sm sm:text-base w-full sm:w-auto"
             >
               Start trading
             </Link>
@@ -135,7 +138,7 @@ export default function CommunitySection() {
               href={brand.appStore.ios}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-8 py-3.5 rounded-2xl border border-white/10 transition-all"
+              className="inline-flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-semibold px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl border border-white/10 transition-all text-sm sm:text-base w-full sm:w-auto"
             >
               Download app
             </a>

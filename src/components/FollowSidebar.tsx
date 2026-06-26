@@ -67,7 +67,7 @@ export default function FollowSidebar() {
                     <span className="text-[13px] font-semibold text-white leading-tight truncate">{user.name}</span>
                     <div className="flex items-center gap-1.5 text-[10px] mt-0.5">
                       <span className="text-[#A0A0A0] truncate">{user.handle}</span>
-                      <span className="text-[#555]">•</span>
+                      <span className="text-[#888]">•</span>
                       <span className="text-[#39FF14] font-bold">{user.winRate} win</span>
                     </div>
                   </div>

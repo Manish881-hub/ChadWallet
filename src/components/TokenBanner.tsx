@@ -2,17 +2,13 @@
 import { useEffect, useState } from 'react';
 import { fetchTrendingTokens } from '@/lib/birdeye';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-/**
- * Rotating token banner (spec #4).
- * Marquee of real trending Solana tokens. Tapping a token opens /trade/{mint}.
- * Renders at top and bottom of the page (pass `position`).
- */
 export default function TokenBanner({ position }: { position: 'top' | 'bottom' }) {
   const [tokens, setTokens] = useState<any[]>([]);
+  const pathname = usePathname();
   useEffect(() => { fetchTrendingTokens().then(setTokens).catch(() => {}); }, []);
 
-  // Duplicate the list so the marquee can loop seamlessly.
   const loop = tokens.length ? [...tokens, ...tokens] : [];
 
   return (
@@ -26,11 +22,15 @@ export default function TokenBanner({ position }: { position: 'top' | 'bottom' }
           {loop.map((token, i) => {
             const change = token.price_change_24h_percent ?? 0;
             const positive = change >= 0;
+            const alreadyHere = pathname === `/trade/${token.address}`;
             return (
               <Link
                 key={`${token.address}-${i}`}
-                href={`/trade/${token.address}`}
-                className="flex items-center gap-2 whitespace-nowrap py-2 px-3 hover:bg-white/5 transition-colors shrink-0"
+                href={alreadyHere ? pathname : `/trade/${token.address}`}
+                className={`flex items-center gap-2 whitespace-nowrap py-2 px-3 transition-colors shrink-0 ${
+                  alreadyHere ? 'cursor-default opacity-60' : 'hover:bg-white/5'
+                }`}
+                onClick={alreadyHere ? (e) => e.preventDefault() : undefined}
               >
                 {token.logo_uri ? (
                   <img

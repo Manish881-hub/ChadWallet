@@ -24,6 +24,7 @@ export default function TrendingList({ current }: { current?: string }) {
   const [tokens, setTokens] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('Tokens');
   const [activeFilter, setActiveFilter] = useState('Trending');
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     fetchTrendingTokens().then(setTokens);
@@ -34,9 +35,9 @@ export default function TrendingList({ current }: { current?: string }) {
       {/* Top Nav */}
       <div className="p-2 pl-3 rounded-t-xl bg-[#09090F] flex items-center shrink-0 border-b border-[rgba(255,255,255,.05)] relative">
         <div className="relative flex-1 min-w-0">
-          <div className="no-scrollbar overflow-x-auto overflow-y-hidden cursor-grab flex items-center gap-3 text-sm font-medium pr-8">
+          <div className="no-scrollbar desktop-only-scroll overflow-x-auto overflow-y-hidden cursor-grab flex items-center gap-3 text-sm font-medium pr-8">
             <button 
-              className={`flex-none flex items-center justify-start gap-1 text-left whitespace-nowrap transition-colors ${activeTab === 'Alerts' ? 'text-white' : 'text-[#6B7280] hover:text-white'}`}
+              className={`flex-none flex items-center justify-start gap-1 text-left whitespace-nowrap transition-colors ${activeTab === 'Alerts' ? 'text-white' : 'text-[#9CA3AF] hover:text-white'}`}
               onClick={() => setActiveTab('Alerts')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -47,21 +48,21 @@ export default function TrendingList({ current }: { current?: string }) {
             </button>
             <div className="w-px h-4 bg-[rgba(255,255,255,.1)]" aria-hidden="true"></div>
             <button 
-              className={`flex-none text-left whitespace-nowrap transition-colors ${activeTab === 'Tokens' ? 'text-white' : 'text-[#6B7280] hover:text-white'}`}
+              className={`flex-none text-left whitespace-nowrap transition-colors ${activeTab === 'Tokens' ? 'text-white' : 'text-[#9CA3AF] hover:text-white'}`}
               onClick={() => setActiveTab('Tokens')}
             >
               Tokens
             </button>
             <div className="w-px h-4 bg-[rgba(255,255,255,.1)]" aria-hidden="true"></div>
             <button 
-              className={`flex-none text-left whitespace-nowrap transition-colors ${activeTab === 'Leaderboard' ? 'text-white' : 'text-[#6B7280] hover:text-white'}`}
+              className={`flex-none text-left whitespace-nowrap transition-colors ${activeTab === 'Leaderboard' ? 'text-white' : 'text-[#9CA3AF] hover:text-white'}`}
               onClick={() => setActiveTab('Leaderboard')}
             >
               Leaderboard
             </button>
             <div className="w-px h-4 bg-[rgba(255,255,255,.1)]" aria-hidden="true"></div>
             <button 
-              className={`flex-none text-left whitespace-nowrap transition-colors ${activeTab === 'Feed' ? 'text-white' : 'text-[#6B7280] hover:text-white'}`}
+              className={`flex-none text-left whitespace-nowrap transition-colors ${activeTab === 'Feed' ? 'text-white' : 'text-[#9CA3AF] hover:text-white'}`}
               onClick={() => setActiveTab('Feed')}
             >
               Feed
@@ -70,8 +71,13 @@ export default function TrendingList({ current }: { current?: string }) {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#09090F] to-transparent"></div>
         </div>
         <div className="ml-auto flex items-center gap-1 shrink-0 bg-[#09090F] pl-1 z-10">
-          <button className="text-[#6B7280] hover:text-white focus:outline-none p-1" aria-label="Collapse panel">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="text-[#9CA3AF] hover:text-white focus:outline-none p-1 transition-colors"
+            aria-label={collapsed ? 'Expand panel' : 'Collapse panel'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              className={`transition-transform ${collapsed ? 'rotate-180' : ''}`}>
               <polyline points="13 17 8 12 13 7"></polyline>
               <polyline points="18 17 13 12 18 7"></polyline>
             </svg>
@@ -81,7 +87,7 @@ export default function TrendingList({ current }: { current?: string }) {
 
       {/* Filter Pills */}
       <div className="relative shrink-0 border-b border-[rgba(255,255,255,.02)]">
-        <div className="no-scrollbar overflow-x-auto overflow-y-hidden cursor-grab flex gap-2 p-2 px-3 pt-3 pb-2 whitespace-nowrap">
+        <div className="no-scrollbar desktop-only-scroll overflow-x-auto overflow-y-hidden cursor-grab flex gap-2 p-2 px-3 pt-3 pb-2 whitespace-nowrap">
           {['Watchlist', 'Crypto', 'Trending', 'Most held', 'Graduated', 'Bonding'].map((filter) => (
             <button
               key={filter}
@@ -106,14 +112,17 @@ export default function TrendingList({ current }: { current?: string }) {
           <ul className="flex flex-col">
             {MOCK_ACTIVITY.map((a, i) => (
               <li key={i}>
-                <div className="flex items-start gap-3 px-3 py-3 transition-colors hover:bg-[rgba(255,255,255,.03)]">
-                  <div className="w-8 h-8 rounded-full bg-[#1F2937] shrink-0 flex items-center justify-center text-[10px] font-bold text-[#6B7280]">
+                <Link
+                  href={`/trade/So11111111111111111111111111111111111111112`}
+                  className="flex items-start gap-3 px-3 py-3 transition-colors hover:bg-[rgba(255,255,255,.03)]"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#1F2937] shrink-0 flex items-center justify-center text-[10px] font-bold text-[#9CA3AF]">
                     {a.trader.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-baseline gap-1.5 flex-wrap">
-                      <span className="text-xs text-[#6B7280] font-mono">{a.trader}</span>
-                      <span className="text-xs text-[#6B7280] font-mono">traders</span>
+                      <span className="text-xs text-[#9CA3AF] font-mono">{a.trader}</span>
+                      <span className="text-xs text-[#9CA3AF] font-mono">traders</span>
                       <span className={`text-xs font-bold font-mono ${a.up ? 'text-[#00C853]' : 'text-[#FF4D4D]'}`}>
                         {a.action}
                       </span>
@@ -121,16 +130,16 @@ export default function TrendingList({ current }: { current?: string }) {
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[11px] text-[#A0A0A0] font-mono">{a.token}</span>
-                      <span className="text-[11px] text-[#6B7280] font-mono">at {a.mc}</span>
+                      <span className="text-[11px] text-[#9CA3AF] font-mono">at {a.mc}</span>
                     </div>
                     <div className="flex items-center gap-1 mt-1">
-                      <svg className="w-3 h-3 text-[#6B7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-[10px] text-[#6B7280] font-mono">{a.time}</span>
+                      <span className="text-[10px] text-[#9CA3AF] font-mono">{a.time}</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>
@@ -204,13 +213,13 @@ export default function TrendingList({ current }: { current?: string }) {
             {MOCK_LEADERBOARD.map((l, i) => (
               <li key={i}>
                 <div className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[rgba(255,255,255,.03)]">
-                  <span className="w-5 text-[10px] font-mono text-[#6B7280] shrink-0 text-right">#{i + 1}</span>
-                  <div className="w-8 h-8 rounded-full bg-[#1F2937] shrink-0 flex items-center justify-center text-[10px] font-bold text-[#6B7280]">
+                  <span className="w-5 text-[10px] font-mono text-[#9CA3AF] shrink-0 text-right">#{i + 1}</span>
+                  <div className="w-8 h-8 rounded-full bg-[#1F2937] shrink-0 flex items-center justify-center text-[10px] font-bold text-[#9CA3AF]">
                     {l.trader.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-sm font-bold text-white truncate">@{l.trader}</span>
-                    <span className="text-[10px] text-[#6B7280] font-mono">{l.trades} trades · {l.winRate}% win</span>
+                    <span className="text-[10px] text-[#9CA3AF] font-mono">{l.trades} trades · {l.winRate}% win</span>
                   </div>
                   <span className={`text-xs font-bold font-mono tabular-nums ${l.up ? 'text-[#00C853]' : 'text-[#FF4D4D]'}`}>
                     {l.pnl}
@@ -224,19 +233,27 @@ export default function TrendingList({ current }: { current?: string }) {
 
       {/* Footer / Split Buttons */}
       <div className="shrink-0 flex items-center gap-2 p-3 border-t border-[rgba(255,255,255,.05)]">
-        <button className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg border border-[rgba(255,255,255,.05)] text-xs font-bold text-[#6B7280] hover:bg-[#12121B] hover:text-white transition-colors">
+        <button
+          onClick={() => setCollapsed(true)}
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg border border-[rgba(255,255,255,.05)] text-xs font-bold text-[#9CA3AF] hover:bg-[#12121B] hover:text-white transition-colors"
+          title="Minimize sidebar"
+        >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="3" y1="15" x2="21" y2="15"></line>
           </svg>
-          Split bottom
+          Minimize
         </button>
-        <button className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg border border-[rgba(255,255,255,.05)] text-xs font-bold text-[#6B7280] hover:bg-[#12121B] hover:text-white transition-colors">
+        <button
+          onClick={() => window.open('https://birdeye.so', '_blank', 'noopener')}
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg border border-[rgba(255,255,255,.05)] text-xs font-bold text-[#9CA3AF] hover:bg-[#12121B] hover:text-white transition-colors"
+          title="Open in Birdeye (external)"
+        >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="15" y1="3" x2="15" y2="21"></line>
           </svg>
-          Split right
+          Full view
         </button>
       </div>
     </div>

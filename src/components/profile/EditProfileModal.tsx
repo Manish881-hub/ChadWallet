@@ -80,7 +80,7 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
                 {formData.banner ? (
                   <img src={formData.banner} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" alt="Banner" />
                 ) : (
-                  <span className="text-xs text-[#555]">Click to upload banner</span>
+                  <span className="text-xs text-[#888]">Click to upload banner</span>
                 )}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full font-medium">Upload</span>
@@ -97,14 +97,14 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
                   {formData.avatar ? (
                     <img src={formData.avatar} className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" alt="Avatar" />
                   ) : (
-                    <svg viewBox="0 0 24 24" className="w-8 h-8 text-[#555]" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    <svg viewBox="0 0 24 24" className="w-8 h-8 text-[#888]" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                   </div>
                   <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'avatar')} />
                 </div>
-                <div className="flex-1 text-xs text-[#6B7280]">
+                <div className="flex-1 text-xs text-[#9CA3AF]">
                   Recommended size: 400x400px. JPG, PNG or GIF.
                 </div>
               </div>
@@ -138,7 +138,7 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#A0A0A0]">Twitter (X)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555] text-sm">@</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888] text-sm">@</span>
                   <input 
                     type="text" 
                     value={formData.twitter || ''} 

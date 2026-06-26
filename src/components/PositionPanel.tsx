@@ -83,7 +83,7 @@ export default function PositionPanel({ tokenMint, tokenSymbol, tokenPrice = 0, 
         <span className="text-[10px] font-mono text-[#A0A0A0]">SOL</span>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-mono text-white tabular-nums">{sol.toFixed(4)}</span>
-          <span className="text-[9px] font-mono text-[#555] tabular-nums">{formatUsd(solUsd)}</span>
+          <span className="text-[9px] font-mono text-[#888] tabular-nums">{formatUsd(solUsd)}</span>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default function PositionPanel({ tokenMint, tokenSymbol, tokenPrice = 0, 
             <span className="text-[10px] font-mono text-white tabular-nums">
               {token >= 1 ? token.toLocaleString(undefined, { maximumFractionDigits: 2 }) : token.toFixed(4)}
             </span>
-            <span className="text-[9px] font-mono text-[#555] tabular-nums">{formatUsd(tokenUsd)}</span>
+            <span className="text-[9px] font-mono text-[#888] tabular-nums">{formatUsd(tokenUsd)}</span>
           </div>
         </div>
       )}

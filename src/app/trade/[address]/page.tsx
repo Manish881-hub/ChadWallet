@@ -17,15 +17,16 @@ const SOL_MINT = 'So11111111111111111111111111111111111111112';
 
 function Skeleton() {
   return (
-    <div className="flex flex-col h-screen bg-[#0A0A0A] text-white">
+    <main className="flex flex-col h-screen bg-[#0A0A0A] text-white">
       <TradeHeader />
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col gap-3 items-center">
           <div className="w-6 h-6 border-2 border-[#39FF14]/30 border-t-[#39FF14] rounded-full animate-spin" />
-          <span className="text-xs font-mono text-[#A0A0A0]">Loading token...</span>
+          <h1 className="sr-only">Loading token...</h1>
+          <span className="text-xs font-mono text-[#A0A0A0]" aria-hidden>Loading token...</span>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -67,11 +68,12 @@ function TradePageInner() {
 
   if (error || !selectedToken) {
     return (
-      <div className="flex flex-col h-screen bg-[#0A0A0A] text-white">
+      <main className="flex flex-col h-screen bg-[#0A0A0A] text-white">
         <TradeHeader />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <span className="text-[#FF1744] text-sm font-mono">{error || 'Token not found'}</span>
+            <h1 className="sr-only">Error loading token</h1>
+            <span className="text-[#FF1744] text-sm font-mono" role="alert">{error || 'Token not found'}</span>
             <button
               onClick={() => selectToken(address!)}
               className="px-4 py-1.5 text-xs font-mono font-bold rounded-lg bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/30 hover:bg-[#39FF14]/20 transition-colors"
@@ -80,12 +82,12 @@ function TradePageInner() {
             </button>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0A0A0A] text-white overflow-hidden">
+    <main className="flex flex-col h-screen bg-[#0A0A0A] text-white overflow-hidden">
       <TradeHeader />
 
       <div className="flex-1 flex min-h-0">
@@ -139,7 +141,7 @@ function TradePageInner() {
       </div>
 
       {/* Mobile swap dock */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#111111] border-t border-[#1F1F1F] max-h-[60vh] overflow-y-auto rounded-t-xl">
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#111111] border-t border-[#1F1F1F] max-h-[60vh] overflow-y-auto rounded-t-xl safe-area-bottom" role="region" aria-label="Swap panel">
         <PositionPanel
           tokenMint={selectedToken.address}
           tokenSymbol={selectedToken.symbol}
@@ -153,7 +155,7 @@ function TradePageInner() {
           marketCap={selectedToken.market_cap}
         />
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -208,8 +210,10 @@ function TabSection({ address }: { address: string }) {
         {CONTENT_TABS.map((t) => (
           <button
             key={t}
+            id={`tab-${t}`}
             role="tab"
             aria-selected={tab === t}
+            aria-controls="tabpanel-content"
             tabIndex={tab === t ? 0 : -1}
             onClick={() => handleTabSwitch(t)}
             className={`relative px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider transition-colors press-scale ${
@@ -228,7 +232,7 @@ function TabSection({ address }: { address: string }) {
       </div>
 
       {/* Content */}
-      <div ref={contentRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
+      <div ref={contentRef} id="tabpanel-content" role="tabpanel" aria-labelledby={`tab-${tab}`} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
         {tab === 'Trades' && <LiveTrades address={address} />}
         {tab === 'Holders' && <HoldersTable address={address} />}
         {tab === 'Swaps' && (

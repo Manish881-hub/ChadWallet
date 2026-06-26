@@ -3,7 +3,7 @@
 
 export const brand = {
   name: 'ChadWallet',
-  tagline: 'Solana,all in one app',
+  tagline: 'Solana, all in one app',
 
   // ── App stores ──────────────────────────────────────────────────────
   appStore: {

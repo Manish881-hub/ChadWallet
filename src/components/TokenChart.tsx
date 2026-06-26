@@ -125,17 +125,17 @@ export default function TokenChart({ address }: TokenChartProps) {
             <button
               key={tf}
               onClick={() => setTimeframe(tf)}
-              className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-md transition-all duration-200 press-scale ${
+              className={`touch-target px-2.5 py-1 text-[10px] font-mono font-bold rounded-md transition-all duration-200 press-scale ${
                 timeframe === tf
                   ? 'bg-[#39FF14]/15 text-[#39FF14] border border-[#39FF14]/30'
-                  : 'text-[#6B7280] hover:text-[#A0A0A0] hover:bg-white/5 border border-transparent'
+                  : 'text-[#9CA3AF] hover:text-[#A0A0A0] hover:bg-white/5 border border-transparent'
               }`}
             >
               {tf}
             </button>
           ))}
 
-          <span className="text-[9px] font-mono text-[#555] ml-1 tabular-nums">
+          <span className="text-[9px] font-mono text-[#888] ml-1 tabular-nums">
             {new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })} UTC
           </span>
         </div>

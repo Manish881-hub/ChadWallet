@@ -78,7 +78,7 @@ export default function ActivitySidebar() {
       {/* Collapse toggle — always visible */}
       <button
         onClick={toggleCollapsed}
-        className="absolute top-2 right-1 z-20 w-6 h-6 flex items-center justify-center rounded-md text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-colors"
+        className="touch-target absolute top-2 right-1 z-20 w-6 h-6 flex items-center justify-center rounded-md text-[#A0A0A0] hover:text-white hover:bg-white/5 transition-colors"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         <svg
@@ -172,7 +172,7 @@ export default function ActivitySidebar() {
                         <div key={i} className="h-11 rounded-lg skeleton" />
                       ))
                     ) : filteredTokens.length === 0 ? (
-                      <div className="p-4 text-center text-[#555] text-xs font-mono">No tokens found</div>
+                      <div className="p-4 text-center text-[#888] text-xs font-mono">No tokens found</div>
                     ) : null}
                     {filteredTokens.map((token) => {
                       const isActive = selectedToken && token.address === selectedToken.address;
@@ -187,7 +187,7 @@ export default function ActivitySidebar() {
                             }`}
                           >
                             {token.logo_uri ? (
-                              <img src={token.logo_uri} className="w-6 h-6 rounded-full shrink-0" alt="" />
+                              <img src={token.logo_uri} width={24} height={24} className="w-6 h-6 rounded-full shrink-0" alt="" loading="lazy" />
                             ) : (
                               <div className="w-6 h-6 rounded-full bg-[#1F1F1F] shrink-0" />
                             )}

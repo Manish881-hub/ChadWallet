@@ -83,16 +83,16 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
       {/* Row 1: Token identity + explorer links */}
       <div className="flex items-center gap-3">
         {/* Token avatar */}
-        <button
-          type="button"
-          aria-label="View token image"
-          className="relative shrink-0 press-scale"
+        <div
+          className="relative shrink-0"
           style={{ width: 40, height: 40 }}
         >
           {token.logo_uri ? (
             <img
               src={token.logo_uri}
               alt={token.symbol}
+              width={40}
+              height={40}
               className="rounded-full border border-[#2A2A2A] w-10 h-10 object-cover"
             />
           ) : (
@@ -100,7 +100,7 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
               {(token.symbol ?? '?').slice(0, 2)}
             </div>
           )}
-        </button>
+        </div>
 
         {/* Symbol + price + change */}
         <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -189,7 +189,7 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
             href={`https://x.com/search?q=${token.symbol}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-md w-7 h-7 bg-[#12121B] hover:bg-white/10 transition-colors"
+            className="touch-target flex items-center justify-center rounded-md w-7 h-7 bg-[#12121B] hover:bg-white/10 transition-colors"
             title={`Search ${token.symbol} on X`}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -202,7 +202,7 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
             href={`https://solscan.io/token/${token.address}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center rounded-md w-7 h-7 bg-[#12121B] hover:bg-white/10 transition-colors"
+            className="touch-target flex items-center justify-center rounded-md w-7 h-7 bg-[#12121B] hover:bg-white/10 transition-colors"
             title="View on Solscan"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -214,7 +214,7 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
           {/* Bookmark / star */}
           <button
             onClick={handleBookmark}
-            className={`flex items-center justify-center rounded-md w-7 h-7 transition-colors press-scale ${
+            className={`touch-target flex items-center justify-center rounded-md w-7 h-7 transition-colors press-scale ${
               bookmarked ? 'bg-[#39FF14]/15' : 'bg-[#12121B] hover:bg-white/10'
             }`}
             title={bookmarked ? 'Remove bookmark' : 'Bookmark token'}
@@ -234,13 +234,13 @@ export default function TokenHeader({ token }: TokenHeaderProps) {
 
       {/* Row 3: Compact metrics strip */}
       {metrics.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar desktop-only-scroll">
           {metrics.map((m, i) => (
             <div
               key={m.label}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#12121B] border border-[rgba(255,255,255,.05)] shrink-0"
             >
-              <span className="text-[9px] uppercase tracking-wider font-mono text-[#6B7280]">{m.label}</span>
+              <span className="text-[9px] uppercase tracking-wider font-mono text-[#9CA3AF]">{m.label}</span>
               <span className="text-[11px] font-mono font-bold tabular-nums text-white">{m.value}</span>
             </div>
           ))}

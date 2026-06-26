@@ -1,23 +1,16 @@
 import type { Metadata } from 'next';
-import { Exo_2, Orbitron, Space_Mono } from 'next/font/google';
+import { Inter, Space_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 import { Providers } from '@/components/PrivyProvider';
 import { ToastProvider } from '@/components/ToastProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
 
-const exo2 = Exo_2({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-body',
-});
-
-const orbitron = Orbitron({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
-  variable: '--font-display',
+  variable: '--font-inter',
 });
 
 const spaceMono = Space_Mono({
@@ -27,19 +20,39 @@ const spaceMono = Space_Mono({
   variable: '--font-mono',
 });
 
+const APP_NAME = 'ChadWallet';
+const APP_DESCRIPTION = 'From memecoins to viral tokens, trade any crypto in seconds.';
+
 export const metadata: Metadata = {
-  title: 'ChadWallet — Solana,all in one app',
-  description: 'From memecoins to viral tokens, trade any crypto in seconds.',
+  title: {
+    default: `${APP_NAME} — Solana, all in one app`,
+    template: `%s | ${APP_NAME}`,
+  },
+  description: APP_DESCRIPTION,
   icons: { icon: '/logo/dark.png', shortcut: '/logo/dark.png', apple: '/logo/dark.png' },
+  manifest: '/manifest.json',
+  robots: { index: true, follow: true },
+  alternates: { canonical: 'https://chadwallet.example.com' },
   openGraph: {
-    title: 'ChadWallet — Solana,all in one app',
-    description: 'From memecoins to viral tokens, trade any crypto in seconds.',
+    type: 'website',
+    siteName: APP_NAME,
+    title: `${APP_NAME} — Solana, all in one app`,
+    description: APP_DESCRIPTION,
+    url: 'https://chadwallet.example.com',
+    locale: 'en_US',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${APP_NAME} — Solana, all in one app`,
+    description: APP_DESCRIPTION,
+    images: ['/og-image.png'],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${exo2.variable} ${orbitron.variable} ${spaceMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${spaceMono.variable}`}>
       <body className="bg-dark text-white antialiased font-sans">
         <Suspense><Providers><ToastProvider><ErrorBoundary>{children}</ErrorBoundary></ToastProvider></Providers></Suspense>
       </body>

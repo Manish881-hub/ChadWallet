@@ -78,6 +78,7 @@ export default function TokenAboutPanel(props: TokenAboutPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const [activeInterval, setActiveInterval] = useState<TimeInterval>('1H');
   const [mounted, setMounted] = useState(false);
+  const [showAllStats, setShowAllStats] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -193,8 +194,11 @@ export default function TokenAboutPanel(props: TokenAboutPanelProps) {
       )}
 
       {/* View more */}
-      <button className="text-[11px] font-mono text-[#39FF14]/70 hover:text-[#39FF14] transition-colors text-center py-1 press-scale">
-        View more
+      <button
+        onClick={() => setShowAllStats(!showAllStats)}
+        className="text-[11px] font-mono text-[#39FF14]/70 hover:text-[#39FF14] transition-colors text-center py-1 press-scale"
+      >
+        {showAllStats ? 'Show less' : 'View more'}
       </button>
     </div>
   );
