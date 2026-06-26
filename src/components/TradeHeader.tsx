@@ -1,20 +1,23 @@
 'use client';
 import Link from 'next/link';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import SignInButton from './SignInButton';
 import { fetchTrendingTokens, fetchTokenOverview } from '@/lib/birdeye';
 import { useTokenBalances } from '@/lib/useTokenBalances';
+import { useSelectedToken } from '@/lib/TokenContext';
 
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
 
 export default function TradeHeader() {
   const { authenticated, user } = usePrivy();
+  const { selectToken } = useSelectedToken();
   const [search, setSearch] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [tokens, setTokens] = useState<any[]>([]);
   const [solPrice, setSolPrice] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [highlightIndex, setHighlightIndex] = useState(0);
 
   // Real SOL balance for the authenticated user.
   const { sol } = useTokenBalances(SOL_MINT);
@@ -29,26 +32,19 @@ export default function TradeHeader() {
       .catch(() => {});
   }, []);
 
+  // Click outside to close
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsFocused(false);
+        setHighlightIndex(0);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isFocused) {
-        setIsFocused(false);
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isFocused]);
-
+  // Command palette keyboard handling
   const filteredTokens = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return tokens;
@@ -58,6 +54,59 @@ export default function TradeHeader() {
     );
   }, [tokens, search]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!isFocused) return;
+
+    if (e.key === 'Escape') {
+      setIsFocused(false);
+      setHighlightIndex(0);
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIndex((prev) =>
+        prev < filteredTokens.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredTokens.length - 1
+      );
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const token = filteredTokens[highlightIndex];
+      if (token) {
+        selectToken(token.address);
+        window.history.pushState({}, '', `/trade/${token.address}`);
+        setIsFocused(false);
+        setSearch('');
+        setHighlightIndex(0);
+      }
+    }
+  }, [isFocused, filteredTokens, highlightIndex, selectToken]);
+
+  // Reset highlight when search changes
+  useEffect(() => {
+    setHighlightIndex(0);
+  }, [search]);
+
+  // Global Ctrl+K or / to focus search
+  useEffect(() => {
+    function handleGlobalKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsFocused(true);
+      } else if (e.key === '/' && !isFocused) {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          setIsFocused(true);
+        }
+      }
+    }
+    document.addEventListener('keydown', handleGlobalKey);
+    return () => document.removeEventListener('keydown', handleGlobalKey);
+  }, [isFocused]);
+
   return (
     <header className="h-11 border-b border-[#1F1F1F] bg-[#0A0A0A] flex items-center px-2.5 shrink-0">
       <div className="flex items-center w-full gap-3">
@@ -65,7 +114,7 @@ export default function TradeHeader() {
         <Link href="/" className="flex items-center shrink-0">
           <img src="/logo/dark.png" alt="Logo" className="w-auto h-5 object-contain" />
         </Link>
-        {/* Center — Search */}
+        {/* Center — Search (command palette) */}
         <div className="relative flex-1 max-w-[400px] hidden sm:block mx-auto">
           <div ref={containerRef} className="relative">
             <div className={`flex h-7 items-center gap-1.5 rounded-md border ${
@@ -79,36 +128,56 @@ export default function TradeHeader() {
                 value={search}
                 onFocus={() => setIsFocused(true)}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search tokens..."
+                onKeyDown={handleKeyDown}
+                placeholder="Search tokens... ( / )"
                 className="flex-1 bg-transparent text-xs text-white outline-none placeholder:text-[#555] font-mono"
               />
               {isFocused && (
-                <button onClick={() => setIsFocused(false)} className="text-[9px] font-mono font-bold text-[#A0A0A0] hover:text-white">
-                  ESC
-                </button>
+                <div className="flex items-center gap-1">
+                  <kbd className="text-[8px] font-mono text-[#555] bg-[#1F1F1F] px-1 rounded">↑↓</kbd>
+                  <kbd className="text-[8px] font-mono text-[#555] bg-[#1F1F1F] px-1 rounded">↵</kbd>
+                  <button onClick={() => { setIsFocused(false); setHighlightIndex(0); }} className="text-[9px] font-mono font-bold text-[#A0A0A0] hover:text-white">
+                    ESC
+                  </button>
+                </div>
               )}
             </div>
 
-            {/* Dropdown */}
+            {/* Dropdown — command palette */}
             {isFocused && (
               <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-[#1F1F1F] bg-[#111111] overflow-hidden shadow-2xl z-50">
-                <div className="px-3 py-1.5 text-[10px] text-[#A0A0A0] font-mono border-b border-[#1F1F1F]">
-                  {search ? 'Results' : 'Trending'}
+                <div className="px-3 py-1.5 text-[10px] text-[#A0A0A0] font-mono border-b border-[#1F1F1F] flex items-center gap-2">
+                  <span>{search ? 'Results' : 'Trending'}</span>
+                  <span className="ml-auto text-[#555]">
+                    {filteredTokens.length > 0 && `${highlightIndex + 1}/${Math.min(filteredTokens.length, 12)}`}
+                  </span>
                 </div>
                 <div className="max-h-[360px] overflow-y-auto scrollbar-thin">
                   {filteredTokens.length === 0 ? (
                     <div className="p-4 text-center text-[#555] text-xs font-mono">No tokens found</div>
                   ) : (
-                    filteredTokens.slice(0, 12).map(token => {
+                    filteredTokens.slice(0, 12).map((token, i) => {
                       const change = token.price_change_24h_percent ?? 0;
                       const positive = change >= 0;
+                      const isHighlighted = i === highlightIndex;
                       return (
-                        <Link
+                        <button
                           key={token.address}
-                          href={`/trade/${token.address}`}
-                          onClick={() => { setIsFocused(false); setSearch(''); }}
-                          className="flex items-center gap-2.5 px-3 py-2 hover:bg-[#1A1A1A] transition-colors border-b border-[#1F1F1F]/50 last:border-0"
+                          onClick={() => {
+                            selectToken(token.address);
+                            window.history.pushState({}, '', `/trade/${token.address}`);
+                            setIsFocused(false);
+                            setSearch('');
+                            setHighlightIndex(0);
+                          }}
+                          onMouseEnter={() => setHighlightIndex(i)}
+                          className={`flex items-center gap-2.5 px-3 py-2 transition-colors border-b border-[#1F1F1F]/50 last:border-0 w-full text-left ${
+                            isHighlighted ? 'bg-[#39FF14]/10' : 'hover:bg-[#1A1A1A]'
+                          }`}
                         >
+                          {isHighlighted && (
+                            <span className="text-[#39FF14] text-[10px] font-mono">▸</span>
+                          )}
                           {token.logo_uri ? (
                             <img src={token.logo_uri} className="w-6 h-6 rounded-full shrink-0" alt={token.symbol} />
                           ) : (
@@ -126,7 +195,7 @@ export default function TradeHeader() {
                           <span className={`text-[10px] font-bold tabular-nums shrink-0 w-16 text-right ${positive ? 'text-[#00C853]' : 'text-[#FF1744]'}`}>
                             {positive ? '+' : ''}{change.toFixed(2)}%
                           </span>
-                        </Link>
+                        </button>
                       );
                     })
                   )}
@@ -136,7 +205,7 @@ export default function TradeHeader() {
           </div>
         </div>
 
-        {/* Right — Cash card + Portfolio + Avatar */}
+        {/* Right — Cash card + Avatar */}
         <div className="flex items-center gap-2 shrink-0">
           {authenticated && (() => {
             const solUsd = sol * solPrice;
