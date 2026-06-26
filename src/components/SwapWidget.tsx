@@ -159,9 +159,38 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
     }
   };
 
+  // Handle quick-fill amount buttons
+  const handleQuickFill = (usd: number) => {
+    if (mode === 'buy') {
+      // Buying token with SOL → amount in SOL = usd / solPrice
+      if (solPrice <= 0) return;
+      const solAmount = usd / solPrice;
+      setAmount(solAmount.toFixed(6));
+    } else {
+      // Selling token → amount in token units = usd / tokenPrice
+      const price = tokenPrice ?? 0;
+      if (price <= 0) return;
+      const tokenAmount = usd / price;
+      setAmount(tokenAmount.toFixed(2));
+    }
+    setQuote(null);
+    setTxSignature(null);
+    setError(null);
+  };
+
+  // Get placeholder text based on mode
+  const getPlaceholder = () => {
+    if (mode === 'buy') return `Amount in SOL...`;
+    return `Amount in ${tokenSymbol}...`;
+  };
+
   // Price impact level
   const priceImpact = quote?.priceImpactPct ? parseFloat(quote.priceImpactPct) : 0;
   const impactLevel = priceImpact > 5 ? 'high' : priceImpact > 1 ? 'medium' : 'low';
+
+  // Input label
+  const inputLabel = mode === 'buy' ? 'You pay' : 'You sell';
+  const inputSuffix = mode === 'buy' ? 'SOL' : tokenSymbol;
 
   return (
     <div className="flex flex-col gap-2.5 p-3">
@@ -170,7 +199,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         <h3 className="text-[11px] font-mono font-bold text-[#A0A0A0] uppercase tracking-wider">Swap</h3>
         <div className="flex rounded-lg overflow-hidden border border-[#1F1F1F]">
           <button
-            onClick={() => { setMode('buy'); setQuote(null); setTxSignature(null); setError(null); }}
+            onClick={() => { setMode('buy'); setQuote(null); setTxSignature(null); setError(null); setAmount(''); }}
             className={`px-4 py-1 text-[10px] font-mono font-bold transition-all duration-200 ${
               mode === 'buy'
                 ? 'bg-[#00C853] text-[#0A0A0A]'
@@ -180,7 +209,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
             BUY
           </button>
           <button
-            onClick={() => { setMode('sell'); setQuote(null); setTxSignature(null); setError(null); }}
+            onClick={() => { setMode('sell'); setQuote(null); setTxSignature(null); setError(null); setAmount(''); }}
             className={`px-4 py-1 text-[10px] font-mono font-bold transition-all duration-200 ${
               mode === 'sell'
                 ? 'bg-[#FF1744] text-white'
@@ -201,14 +230,17 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
       {/* Input */}
       <div className="relative">
         <div className="flex items-center bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] focus-within:border-[#39FF14]/40 transition-colors">
-          <span className="pl-3 text-sm font-mono text-[#A0A0A0]">$</span>
+          <div className="pl-3 flex items-center gap-1.5">
+            <span className="text-[9px] font-mono text-[#555]">{inputLabel}</span>
+          </div>
           <input
             type="number"
-            placeholder="0.00"
+            placeholder={getPlaceholder()}
             value={amount}
             onChange={e => { setAmount(e.target.value); setQuote(null); setTxSignature(null); setError(null); }}
             className="flex-1 bg-transparent px-2 py-2.5 text-white font-mono tabular-nums text-sm outline-none placeholder:text-[#333]"
           />
+          <span className="pr-3 text-[10px] font-mono text-[#555]">{inputSuffix}</span>
           {amount && (
             <button
               onClick={() => { setAmount(''); setQuote(null); setError(null); }}
@@ -219,19 +251,17 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
             </button>
           )}
         </div>
-        {/* Quick-fill buttons — USD amounts */}
+        {/* Quick-fill buttons */}
         <div className="flex gap-1.5 mt-1.5">
           {[10, 100, 500, 1000].map(usd => (
             <button
               key={usd}
-              onClick={() => {
-                const price = mode === 'buy' ? solPrice : (tokenPrice ?? 0);
-                if (price <= 0) return;
-                const val = (usd / price).toFixed(6);
-                setAmount(val);
-                setQuote(null);
-              }}
-              className="flex-1 py-1 text-[10px] font-mono font-bold text-[#A0A0A0] bg-[#0A0A0A] rounded border border-[#1F1F1F] hover:text-white hover:border-[#39FF14]/30 transition-all"
+              onClick={() => handleQuickFill(usd)}
+              className={`flex-1 py-1 text-[10px] font-mono font-bold rounded border transition-all ${
+                mode === 'buy'
+                  ? 'text-[#A0A0A0] bg-[#0A0A0A] border-[#1F1F1F] hover:text-[#00C853] hover:border-[#00C853]/30'
+                  : 'text-[#A0A0A0] bg-[#0A0A0A] border-[#1F1F1F] hover:text-[#FF1744] hover:border-[#FF1744]/30'
+              }`}
             >
               ${usd}
             </button>
@@ -246,7 +276,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         </div>
       )}
 
-      {/* Quote summary — shown inline, compact */}
+      {/* Quote summary */}
       {quote && (
         <div className="flex flex-col gap-1.5 bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] px-3 py-2">
           <div className="flex items-center justify-between">
@@ -276,7 +306,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         </div>
       )}
 
-      {/* Main action button */}
+      {/* Main action button — color matches buy/sell mode */}
       <button
         onClick={() => {
           if (!user) { setLoginOpen(true); }
@@ -312,7 +342,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         ) : quote ? (
           `${mode === 'buy' ? 'Buy' : 'Sell'} ${tokenSymbol}`
         ) : (
-          `${mode === 'buy' ? 'Buy' : 'Sell'} ${tokenSymbol}`
+          `Get Quote — ${mode === 'buy' ? 'Buy' : 'Sell'} ${tokenSymbol}`
         )}
       </button>
 
