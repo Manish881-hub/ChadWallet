@@ -1,4 +1,5 @@
 'use client';
+import { useParams } from 'next/navigation';
 import { SidebarProvider, TokenProvider } from '@/lib/TokenContext';
 import { ProfileProvider } from '@/lib/ProfileContext';
 import TradeHeader from '@/components/TradeHeader';
@@ -6,11 +7,10 @@ import ActivitySidebar from '@/components/ActivitySidebar';
 import FollowSidebar from '@/components/FollowSidebar';
 import ProfileLayout from '@/components/profile/ProfileLayout';
 
-export default function ProfilePage({ params }: { params: { address: string } }) {
-  // In a real app we would pass params.address into ProfileProvider or ProfileLayout
-  // to fetch and display that specific user's data.
-  // For this demo, we'll just render the global profile or mock if it's someone else.
-  
+export default function ProfilePage() {
+  const params = useParams<{ address: string }>();
+  const address = params?.address ?? '';
+
   return (
     <TokenProvider>
       <ProfileProvider>
@@ -19,7 +19,7 @@ export default function ProfilePage({ params }: { params: { address: string } })
             <TradeHeader />
             <div className="flex-1 flex min-h-0">
               <ActivitySidebar />
-              <ProfileLayout address={params.address} />
+              <ProfileLayout address={address} />
               <FollowSidebar />
             </div>
           </div>
