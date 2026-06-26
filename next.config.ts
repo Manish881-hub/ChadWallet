@@ -48,7 +48,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.birdeye.so https://*.alchemy.com https://*.jup.ag https://*.privy.io https://api.privy.io wss://*.privy.io https://solana-mainnet.g.alchemy.com",
+      "connect-src 'self' https://*.birdeye.so https://*.alchemy.com https://*.jup.ag https://*.privy.io https://api.privy.io wss://*.privy.io https://solana-mainnet.g.alchemy.com https://explorer-api.walletconnect.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org",
       "frame-src 'self' https://*.privy.io https://verify.walletconnect.com https://verify.walletconnect.org",
       "frame-ancestors 'self'",
     ].join('; '),
@@ -64,6 +64,18 @@ const nextConfig: NextConfig = {
     // Redirect the broken react-aria/* subpath imports to their real .js files.
     config.resolve = config.resolve || {};
     config.resolve.alias = { ...(config.resolve.alias || {}), ...reactAriaAliases };
+
+    // @privy-io/react-auth v3.32 does a dynamic import("@farcaster/mini-app-solana")
+    // inside a try/catch — it's optional and only used in Farcaster Mini Apps.
+    // Webpack still statically resolves it and fails, so we tell it to ignore it.
+    const webpack = require('webpack');
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^@farcaster\/mini-app-solana$/,
+      })
+    );
+
     return config;
   },
   images: {
