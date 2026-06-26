@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import SignInButton from './SignInButton';
+import ProfileMenu from './profile/ProfileMenu';
 import { fetchTrendingTokens, fetchTokenOverview } from '@/lib/birdeye';
 import { useTokenBalances } from '@/lib/useTokenBalances';
 import { useSelectedToken } from '@/lib/TokenContext';
@@ -220,7 +221,15 @@ export default function TradeHeader() {
                   <span className="text-xs font-mono font-bold text-white tabular-nums">{sol.toFixed(3)} SOL</span>
                   <span className="text-[9px] font-mono text-[#A0A0A0]">balance</span>
                 </div>
-                <button className="text-[9px] font-mono font-bold text-[#39FF14] hover:text-[#39FF14]/80 transition-colors ml-0.5" title="Fund wallet">
+                <button
+                  onClick={() => {
+                    const el = document.querySelector('[data-fund-wallet]') as HTMLButtonElement;
+                    if (el) el.click();
+                  }}
+                  className="text-[9px] font-mono font-bold text-[#39FF14] hover:text-[#39FF14]/80 transition-colors ml-0.5 press-scale"
+                  title="Fund wallet"
+                  aria-label="Fund wallet"
+                >
                   +
                 </button>
               </div>
@@ -228,15 +237,7 @@ export default function TradeHeader() {
           })()}
 
           {/* Avatar / Sign in */}
-          <div className="w-7 h-7 rounded-full bg-[#111111] border border-[#1F1F1F] flex items-center justify-center overflow-hidden">
-            {authenticated ? (
-              <div className="w-full h-full bg-gradient-to-br from-[#39FF14]/40 to-[#00C853]/40 flex items-center justify-center text-[9px] font-bold text-white">
-                {(user?.wallet?.address ?? 'U').slice(0, 2).toUpperCase()}
-              </div>
-            ) : (
-              <SignInButton />
-            )}
-          </div>
+          <ProfileMenu />
         </div>
       </div>
     </header>

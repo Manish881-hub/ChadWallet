@@ -52,8 +52,10 @@ export default function SwapWidget({
   const [solPrice, setSolPrice] = useState(170);
   const [showSuccess, setShowSuccess] = useState(false);
   const [activePreset, setActivePreset] = useState<number | null>(null);
+  const [showUnverifiedInfo, setShowUnverifiedInfo] = useState(false);
   const slippageRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const balanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Parse USD amount to number
   const usdValue = parseFloat(usdAmount) || 0;
@@ -187,10 +189,12 @@ export default function SwapWidget({
         setTimeout(() => setShowSuccess(false), 3000);
 
         // Refresh balances after swap
-        setTimeout(async () => {
+        if (balanceTimerRef.current) clearTimeout(balanceTimerRef.current);
+        balanceTimerRef.current = setTimeout(async () => {
           try {
             const pubkey = new PublicKey(wallet.address);
             const sol = await connection.getBalance(pubkey);
+            if (!balanceTimerRef.current) return;
             setSolBalance(sol / 1e9);
             try {
               const tokenAccounts = await connection.getParsedTokenAccountsByOwner(pubkey, { mint: new PublicKey(tokenMint) });
@@ -465,7 +469,7 @@ export default function SwapWidget({
       <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
 
       {/* Unverified token warning */}
-      <div className="flex items-center gap-2 px-2.5 py-2 bg-[#FFA726]/5 border border-[#FFA726]/15 rounded-lg">
+      <div className="flex items-center gap-2 px-2.5 py-2 bg-[#FFA726]/5 border border-[#FFA726]/15 rounded-lg relative">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFA726" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
@@ -473,8 +477,10 @@ export default function SwapWidget({
         </svg>
         <span className="text-[11px] font-mono text-[#FFA726]">Unverified token</span>
         <button
+          onClick={() => setShowUnverifiedInfo(!showUnverifiedInfo)}
           className="ml-auto text-[#FFA726]/50 hover:text-[#FFA726] transition-colors"
           title="Unverified tokens may be risky. Always do your own research."
+          aria-label="More info about unverified tokens"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
@@ -482,6 +488,12 @@ export default function SwapWidget({
             <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
         </button>
+        {showUnverifiedInfo && (
+          <div className="absolute bottom-full left-0 right-0 mb-2 p-2 bg-[#1A1A1A] border border-[#FFA726]/20 rounded-lg text-[10px] font-mono text-[#FFA726] z-10 animate-slide-down">
+            This token has not been verified. It may be a scam or rug pull.
+            Always do your own research before trading.
+          </div>
+        )}
       </div>
 
       {/* Transaction success */}

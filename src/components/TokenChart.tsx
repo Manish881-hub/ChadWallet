@@ -31,16 +31,10 @@ export default function TokenChart({ address }: TokenChartProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>('1D');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [showMySwaps, setShowMySwaps] = useState(false);
-  const [showThesis, setShowThesis] = useState(false);
-  const [showFriendsOnly, setShowFriendsOnly] = useState(false);
-  const [logScale, setLogScale] = useState(false);
-  const [autoScale, setAutoScale] = useState(true);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Clear previous widget
     const container = containerRef.current;
     container.innerHTML = '';
     setLoading(true);
@@ -49,62 +43,6 @@ export default function TokenChart({ address }: TokenChartProps) {
     const interval = TIMEFRAME_TO_INTERVAL[timeframe];
     const range = TIMEFRAME_TO_RANGE[timeframe];
 
-    // Build TradingView widget URL
-    // Using the embedded chart widget
-    const widgetOptions = {
-      autosize: true,
-      symbol: `RAYDIUM:${address}`,
-      interval: interval,
-      range: range,
-      timezone: 'Etc/UTC',
-      theme: 'dark',
-      style: '1', // candlestick
-      locale: 'en',
-      backgroundColor: 'rgba(9, 9, 15, 1)',
-      gridColor: 'rgba(31, 31, 31, 0.6)',
-      hide_top_toolbar: true,
-      hide_legend: false,
-      hide_side_toolbar: true,
-      allow_symbol_change: false,
-      save_image: false,
-      enable_publishing: false,
-      withdateranges: false,
-      support_host: 'https://www.tradingview.com',
-    };
-
-    // Create TradingView widget via script
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.async = true;
-    script.onload = () => {
-      if (!(window as any).TradingView) {
-        setError(true);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        new (window as any).TradingView.widget({
-          ...widgetOptions,
-          container_id: container.id,
-        });
-
-        // TradingView widget doesn't have a clean onReady callback,
-        // so we wait a bit for the iframe to render
-        const timer = setTimeout(() => setLoading(false), 2000);
-        return () => clearTimeout(timer);
-      } catch {
-        setError(true);
-        setLoading(false);
-      }
-    };
-    script.onerror = () => {
-      setError(true);
-      setLoading(false);
-    };
-
-    // Fallback: Use an iframe embed directly if script fails
-    // This is more reliable for Solana tokens
     const iframe = document.createElement('iframe');
     const params = new URLSearchParams({
       symbol: `RAYDIUM:${address}`,
@@ -130,13 +68,8 @@ export default function TokenChart({ address }: TokenChartProps) {
     iframe.loading = 'lazy';
     iframe.id = `tv-chart-${address}`;
 
-    iframe.onload = () => {
-      setLoading(false);
-    };
-    iframe.onerror = () => {
-      setError(true);
-      setLoading(false);
-    };
+    iframe.onload = () => setLoading(false);
+    iframe.onerror = () => { setError(true); setLoading(false); };
 
     container.appendChild(iframe);
 
@@ -148,7 +81,6 @@ export default function TokenChart({ address }: TokenChartProps) {
   const handleRetry = () => {
     setError(false);
     setLoading(true);
-    // Force re-render by toggling timeframe
     const current = timeframe;
     setTimeframe('1D');
     setTimeout(() => setTimeframe(current), 50);
@@ -156,9 +88,7 @@ export default function TokenChart({ address }: TokenChartProps) {
 
   return (
     <div className="flex flex-col bg-[#09090F] rounded-xl border border-[rgba(255,255,255,.05)] overflow-hidden h-full">
-      {/* Chart container — fills available space */}
       <div className="relative flex-1 min-h-0 min-w-0">
-        {/* Loading skeleton */}
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#09090F]">
             <div className="flex flex-col items-center gap-3">
@@ -168,7 +98,6 @@ export default function TokenChart({ address }: TokenChartProps) {
           </div>
         )}
 
-        {/* Error state */}
         {error && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#09090F]">
             <div className="flex flex-col items-center gap-3">
@@ -190,9 +119,7 @@ export default function TokenChart({ address }: TokenChartProps) {
         />
       </div>
 
-      {/* Chart controls bar */}
       <div className="flex flex-col gap-2 px-3 py-2 border-t border-[rgba(255,255,255,.05)]">
-        {/* Timeframe buttons + timestamp + scale toggles */}
         <div className="flex items-center gap-1">
           {TIMEFRAMES.map((tf) => (
             <button
@@ -211,57 +138,6 @@ export default function TokenChart({ address }: TokenChartProps) {
           <span className="text-[9px] font-mono text-[#555] ml-1 tabular-nums">
             {new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })} UTC
           </span>
-
-          <div className="ml-auto flex items-center gap-1">
-            <button
-              onClick={() => setLogScale(!logScale)}
-              className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded transition-colors ${
-                logScale ? 'text-[#39FF14] bg-[#39FF14]/10' : 'text-[#555] hover:text-[#A0A0A0]'
-              }`}
-            >
-              log
-            </button>
-            <button
-              onClick={() => setAutoScale(!autoScale)}
-              className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded transition-colors ${
-                autoScale ? 'text-[#39FF14] bg-[#39FF14]/10' : 'text-[#555] hover:text-[#A0A0A0]'
-              }`}
-            >
-              auto
-            </button>
-          </div>
-        </div>
-
-        {/* Overlay checkboxes */}
-        <div className="flex items-center gap-4 text-[10px] font-mono">
-          <span className="text-[#A0A0A0] font-bold">Chart overlays</span>
-          <label className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={showMySwaps}
-              onChange={() => setShowMySwaps(!showMySwaps)}
-              className="accent-[#39FF14] w-3 h-3 rounded"
-            />
-            My swaps
-          </label>
-          <label className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={showThesis}
-              onChange={() => setShowThesis(!showThesis)}
-              className="accent-[#39FF14] w-3 h-3 rounded"
-            />
-            Thesis
-          </label>
-          <label className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={showFriendsOnly}
-              onChange={() => setShowFriendsOnly(!showFriendsOnly)}
-              className="accent-[#39FF14] w-3 h-3 rounded"
-            />
-            Friends only
-          </label>
         </div>
       </div>
     </div>

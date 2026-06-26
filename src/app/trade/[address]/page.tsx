@@ -31,15 +31,17 @@ function Skeleton() {
 
 function TradePageInner() {
   const { address } = useParams<{ address: string }>();
-  const { selectedToken, selectToken, loading: tokenLoading } = useSelectedToken();
+  const { selectedToken, selectToken, loading: tokenLoading, error } = useSelectedToken();
   const [solPrice, setSolPrice] = useState(0);
+  const initDone = useRef(false);
 
   // Initialize the token context with the URL address on mount
   useEffect(() => {
-    if (address && address !== selectedToken?.address) {
+    if (address) {
       selectToken(address);
+      initDone.current = true;
     }
-  }, [address]);
+  }, [address, selectToken]);
 
   // Fetch SOL price once
   useEffect(() => {
@@ -61,7 +63,26 @@ function TradePageInner() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [selectToken]);
 
-  if (tokenLoading || !selectedToken) return <Skeleton />;
+  if (tokenLoading) return <Skeleton />;
+
+  if (error || !selectedToken) {
+    return (
+      <div className="flex flex-col h-screen bg-[#0A0A0A] text-white">
+        <TradeHeader />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-[#FF1744] text-sm font-mono">{error || 'Token not found'}</span>
+            <button
+              onClick={() => selectToken(address!)}
+              className="px-4 py-1.5 text-xs font-mono font-bold rounded-lg bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/30 hover:bg-[#39FF14]/20 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-[#0A0A0A] text-white overflow-hidden">

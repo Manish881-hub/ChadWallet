@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
 import { logger } from '@/lib/logger';
 
@@ -27,7 +27,10 @@ const GoogleIcon = () => (
 );
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const [loggingIn, setLoggingIn] = useState<'apple' | 'google' | null>(null);
+
   const handleError = useCallback((error: any) => {
+    setLoggingIn(null);
     if (error === 'exited_auth_flow') {
       logger.warn('OAuth flow cancelled by user');
     } else {
@@ -40,6 +43,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const { initOAuth } = useLoginWithOAuth({
     onError: handleError,
   });
+
+  const handleLogin = useCallback((provider: 'apple' | 'google') => {
+    setLoggingIn(provider);
+    initOAuth({ provider });
+  }, [initOAuth]);
 
   // Close on escape key
   useEffect(() => {
@@ -89,19 +97,29 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Buttons */}
           <div className="flex flex-col gap-3 mb-6">
             <button
-              onClick={() => initOAuth({ provider: 'apple' })}
-              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-black font-semibold rounded-xl py-3.5 transition-colors"
+              onClick={() => handleLogin('apple')}
+              disabled={!!loggingIn}
+              className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-black font-semibold rounded-xl py-3.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <AppleIcon />
-              Continue with Apple
+              {loggingIn === 'apple' ? (
+                <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              ) : (
+                <AppleIcon />
+              )}
+              {loggingIn === 'apple' ? 'Signing in…' : 'Continue with Apple'}
             </button>
 
             <button
-              onClick={() => initOAuth({ provider: 'google' })}
-              className="w-full flex items-center justify-center gap-3 bg-[#0f111a] hover:bg-[#1a1d2d] border border-white/10 text-white font-semibold rounded-xl py-3.5 transition-colors"
+              onClick={() => handleLogin('google')}
+              disabled={!!loggingIn}
+              className="w-full flex items-center justify-center gap-3 bg-[#0f111a] hover:bg-[#1a1d2d] border border-white/10 text-white font-semibold rounded-xl py-3.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <GoogleIcon />
-              Continue with Google
+              {loggingIn === 'google' ? (
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <GoogleIcon />
+              )}
+              {loggingIn === 'google' ? 'Signing in…' : 'Continue with Google'}
             </button>
           </div>
 

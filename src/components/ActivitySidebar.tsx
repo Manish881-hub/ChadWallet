@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import { useSelectedToken, useSidebar } from '@/lib/TokenContext';
 import { fetchTrendingTokens } from '@/lib/birdeye';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,8 +20,15 @@ export default function ActivitySidebar() {
   const [activeTab, setActiveTab] = useState<SidebarTab>('Tokens');
   const [activeChip, setActiveChip] = useState<FilterChip>('Trending');
   const [tokens, setTokens] = useState<any[]>([]);
+  const [loadingTokens, setLoadingTokens] = useState(true);
 
-  useEffect(() => { fetchTrendingTokens().then(setTokens); }, []);
+  useEffect(() => {
+    setLoadingTokens(true);
+    fetchTrendingTokens().then((data) => {
+      setTokens(data);
+      setLoadingTokens(false);
+    }).catch(() => setLoadingTokens(false));
+  }, []);
 
   // Filter tokens by active chip
   const filteredTokens = useMemo(() => {
@@ -159,10 +167,13 @@ export default function ActivitySidebar() {
 
                   {/* Token list — clicking updates shared state */}
                   <ul className="flex flex-col gap-0.5">
-                    {filteredTokens.length === 0 &&
+                    {filteredTokens.length === 0 && loadingTokens ? (
                       Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="h-11 rounded-lg skeleton" />
-                      ))}
+                      ))
+                    ) : filteredTokens.length === 0 ? (
+                      <div className="p-4 text-center text-[#555] text-xs font-mono">No tokens found</div>
+                    ) : null}
                     {filteredTokens.map((token) => {
                       const isActive = selectedToken && token.address === selectedToken.address;
                       const change = token.price_change_24h_percent ?? 0;
@@ -210,18 +221,19 @@ export default function ActivitySidebar() {
                     { rank: 4, name: 'sol_alpha', pnl: '+$45,300', winRate: '68%' },
                     { rank: 5, name: 'chadwallet', pnl: '+$34,100', winRate: '65%' },
                   ].map((trader) => (
-                    <div
+                    <Link
                       key={trader.rank}
-                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-white/5 transition-colors"
+                      href={`/profile/${trader.name}`}
+                      className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-white/5 transition-colors group cursor-pointer"
                     >
                       <span className="text-[10px] font-mono text-[#A0A0A0] w-4 text-center">{trader.rank}</span>
                       <div className="w-6 h-6 rounded-full bg-[#1F1F1F] flex items-center justify-center text-[9px] font-bold text-white shrink-0">
                         {trader.name.slice(0, 2).toUpperCase()}
                       </div>
-                      <span className="text-[11px] text-white font-medium flex-1 truncate">{trader.name}</span>
+                      <span className="text-[11px] text-white font-medium flex-1 truncate group-hover:text-[#4D62FF] transition-colors">{trader.name}</span>
                       <span className="text-[11px] font-mono text-[#00C853] tabular-nums">{trader.pnl}</span>
                       <span className="text-[10px] font-mono text-[#A0A0A0] tabular-nums">{trader.winRate}</span>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}

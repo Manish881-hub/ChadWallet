@@ -31,12 +31,14 @@ interface TokenContextType {
   selectedToken: TokenData | null;
   selectToken: (address: string) => void;
   loading: boolean;
+  error: string | null;
 }
 
 const TokenContext = createContext<TokenContextType>({
   selectedToken: null,
   selectToken: () => {},
   loading: true,
+  error: null,
 });
 
 const SidebarContext = createContext<SidebarContextType>({
@@ -55,21 +57,32 @@ export function useSidebar() {
 export function TokenProvider({ children, initialAddress }: { children: React.ReactNode; initialAddress?: string }) {
   const [selectedToken, setSelectedToken] = useState<TokenData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(initialAddress ?? null);
 
   const selectToken = useCallback((addr: string) => {
     setAddress(addr);
+    setError(null);
   }, []);
 
   useEffect(() => {
     if (!address) return;
     let cancelled = false;
     setLoading(true);
+    setError(null);
     fetchTokenOverview(address)
       .then((info) => {
-        if (!cancelled && info) setSelectedToken(info);
+        if (!cancelled) {
+          if (info) {
+            setSelectedToken(info);
+          } else {
+            setError('Token data not found');
+          }
+        }
       })
-      .catch(() => {})
+      .catch((err) => {
+        if (!cancelled) setError(err?.message || 'Failed to load token');
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
@@ -77,7 +90,7 @@ export function TokenProvider({ children, initialAddress }: { children: React.Re
   }, [address]);
 
   return (
-    <TokenContext.Provider value={{ selectedToken, selectToken, loading }}>
+    <TokenContext.Provider value={{ selectedToken, selectToken, loading, error }}>
       {children}
     </TokenContext.Provider>
   );
