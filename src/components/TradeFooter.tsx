@@ -16,12 +16,12 @@ interface TickerToken {
 
 const TICKER_MINTS = [
   { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112', logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png' },
-  { symbol: 'BTC', address: 'cbbtcf3aa214zXhbiAZQw', logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
+  { symbol: 'cbBTC', address: 'cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij', logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
   { symbol: 'ETH', address: '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs', logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
   { symbol: 'BONK', address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', logo: 'https://assets.coingecko.com/coins/images/26570/large/bonk.png' },
-  { symbol: 'JUP', address: 'JUPyiwrYJFkyUP2HGCWoxkijsKxFvJBkGPVTNf7YwRap', logo: 'https://assets.coingecko.com/coins/images/29550/large/jup.png' },
+  { symbol: 'JUP', address: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', logo: 'https://assets.coingecko.com/coins/images/29550/large/jup.png' },
   { symbol: 'WIF', address: 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm', logo: 'https://assets.coingecko.com/coins/images/30834/large/dogwifcoin.png' },
-  { symbol: 'HYPE', address: '98sMhvDw', logo: 'https://assets.coingecko.com/coins/images/50882/large/hyperliquid.jpg' },
+  { symbol: 'RENDER', address: 'rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof', logo: 'https://assets.coingecko.com/coins/images/11636/large/rndr.png' },
 ];
 
 export default function TradeFooter() {
