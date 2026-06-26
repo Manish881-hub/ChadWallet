@@ -19,11 +19,11 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ChadWallet — where traders become legends.',
+  title: 'ChadWallet — Solana,all in one app',
   description: 'From memecoins to viral tokens, trade any crypto in seconds.',
   icons: { icon: '/logo/dark.png', shortcut: '/logo/dark.png', apple: '/logo/dark.png' },
   openGraph: {
-    title: 'ChadWallet — where traders become legends.',
+    title: 'ChadWallet — Solana,all in one app',
     description: 'From memecoins to viral tokens, trade any crypto in seconds.',
   },
 };
