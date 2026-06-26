@@ -13,6 +13,7 @@ export interface TokenData {
   price_change_1h_percent: number;
   price_change_5m_percent: number;
   price_change_6h_percent: number;
+  price_change_4h_percent: number;
   market_cap: number;
   real_fdv: number;
   volume_24h: number;

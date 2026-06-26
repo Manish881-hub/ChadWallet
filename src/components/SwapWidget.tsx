@@ -2,7 +2,7 @@
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { Connection, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import { createJupiterApiClient } from '@jup-ag/api';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchTokenOverview } from '@/lib/birdeye';
 import { logger } from '@/lib/logger';
 import LoginModal from './LoginModal';
@@ -13,7 +13,25 @@ const jupiterApi = createJupiterApiClient();
 
 type Slippage = 0.5 | 1 | 3;
 
-export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tokenMint: string; tokenSymbol: string; tokenPrice?: number }) {
+function formatUSD(value: number): string {
+  if (!value || value <= 0) return '—';
+  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
+  return `$${value.toFixed(2)}`;
+}
+
+export default function SwapWidget({
+  tokenMint,
+  tokenSymbol,
+  tokenPrice,
+  marketCap,
+}: {
+  tokenMint: string;
+  tokenSymbol: string;
+  tokenPrice?: number;
+  marketCap?: number;
+}) {
   const { user } = usePrivy();
   const { wallets } = useWallets();
   const wallet = wallets.find(w => w.walletClientType === 'privy');
@@ -22,8 +40,9 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
   const [solBalance, setSolBalance] = useState(0);
   const [tokenBalance, setTokenBalance] = useState(0);
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
-  const [amount, setAmount] = useState('');
-  const [slippage] = useState<Slippage>(1);
+  const [usdAmount, setUsdAmount] = useState('');
+  const [slippage, setSlippage] = useState<Slippage>(1);
+  const [showSlippage, setShowSlippage] = useState(false);
   const [quote, setQuote] = useState<any>(null);
   const [quoteAge, setQuoteAge] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -31,6 +50,19 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
   const [txSignature, setTxSignature] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [solPrice, setSolPrice] = useState(170);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [activePreset, setActivePreset] = useState<number | null>(null);
+  const slippageRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Parse USD amount to number
+  const usdValue = parseFloat(usdAmount) || 0;
+
+  // Calculate SOL equivalent
+  const solEquivalent = solPrice > 0 ? usdValue / solPrice : 0;
+
+  // Available balance in USD
+  const availableUsd = mode === 'buy' ? solBalance * solPrice : tokenBalance * (tokenPrice ?? 0);
 
   // Fetch SOL price
   useEffect(() => {
@@ -69,8 +101,19 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
     return () => clearInterval(interval);
   }, [quote]);
 
+  // Close slippage popover on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (slippageRef.current && !slippageRef.current.contains(e.target as Node)) {
+        setShowSlippage(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const fetchQuote = useCallback(async () => {
-    if (!amount || parseFloat(amount) <= 0) return;
+    if (usdValue <= 0) return;
     setLoading(true);
     setError(null);
     setQuote(null);
@@ -79,7 +122,15 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
 
     const inputMint = mode === 'buy' ? SOL_MINT : tokenMint;
     const outputMint = mode === 'buy' ? tokenMint : SOL_MINT;
-    const amountLamports = Math.floor(parseFloat(amount) * 10 ** (mode === 'buy' ? 9 : 6));
+
+    // Convert USD to lamports/token units
+    let amountLamports: number;
+    if (mode === 'buy') {
+      amountLamports = Math.floor(solEquivalent * 1e9);
+    } else {
+      const tokenAmount = (tokenPrice ?? 0) > 0 ? usdValue / (tokenPrice ?? 1) : 0;
+      amountLamports = Math.floor(tokenAmount * 1e6);
+    }
 
     try {
       const quoteRes = await jupiterApi.quoteGet({
@@ -95,7 +146,7 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
     } finally {
       setLoading(false);
     }
-  }, [amount, mode, tokenMint, slippage]);
+  }, [usdValue, mode, tokenMint, slippage, solEquivalent, tokenPrice]);
 
   const swap = async () => {
     if (!wallet || !quote) return;
@@ -130,8 +181,10 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
 
       if (signature) {
         setTxSignature(signature);
-        setAmount('');
+        setUsdAmount('');
         setQuote(null);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
 
         // Refresh balances after swap
         setTimeout(async () => {
@@ -159,126 +212,178 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
     }
   };
 
-  // Handle quick-fill amount buttons
   const handleQuickFill = (usd: number) => {
-    if (mode === 'buy') {
-      // Buying token with SOL → amount in SOL = usd / solPrice
-      if (solPrice <= 0) return;
-      const solAmount = usd / solPrice;
-      setAmount(solAmount.toFixed(6));
-    } else {
-      // Selling token → amount in token units = usd / tokenPrice
-      const price = tokenPrice ?? 0;
-      if (price <= 0) return;
-      const tokenAmount = usd / price;
-      setAmount(tokenAmount.toFixed(2));
-    }
+    setUsdAmount(String(usd));
+    setActivePreset(usd);
     setQuote(null);
     setTxSignature(null);
     setError(null);
   };
 
-  // Get placeholder text based on mode
-  const getPlaceholder = () => {
-    if (mode === 'buy') return `Amount in SOL...`;
-    return `Amount in ${tokenSymbol}...`;
+  const handleMaxFill = () => {
+    if (availableUsd > 0) {
+      // Leave a tiny buffer for SOL gas if buying
+      const max = mode === 'buy' ? Math.max(0, availableUsd - 0.5) : availableUsd;
+      setUsdAmount(max.toFixed(2));
+      setActivePreset(null);
+      setQuote(null);
+      setError(null);
+    }
   };
 
   // Price impact level
   const priceImpact = quote?.priceImpactPct ? parseFloat(quote.priceImpactPct) : 0;
   const impactLevel = priceImpact > 5 ? 'high' : priceImpact > 1 ? 'medium' : 'low';
 
-  // Input label
-  const inputLabel = mode === 'buy' ? 'You pay' : 'You sell';
-  const inputSuffix = mode === 'buy' ? 'SOL' : tokenSymbol;
-
   return (
-    <div className="flex flex-col gap-2.5 p-3">
-      {/* Header with mode toggle */}
+    <div className="flex flex-col gap-3 p-3 overflow-y-auto scrollbar-thin">
+      {/* Market cap */}
       <div className="flex items-center justify-between">
-        <h3 className="text-[11px] font-mono font-bold text-[#A0A0A0] uppercase tracking-wider">Swap</h3>
-        <div className="flex rounded-lg overflow-hidden border border-[#1F1F1F]">
-          <button
-            onClick={() => { setMode('buy'); setQuote(null); setTxSignature(null); setError(null); setAmount(''); }}
-            className={`px-4 py-1 text-[10px] font-mono font-bold transition-all duration-200 ${
-              mode === 'buy'
-                ? 'bg-[#00C853] text-[#0A0A0A]'
-                : 'bg-transparent text-[#A0A0A0] hover:text-white'
-            }`}
-          >
-            BUY
-          </button>
-          <button
-            onClick={() => { setMode('sell'); setQuote(null); setTxSignature(null); setError(null); setAmount(''); }}
-            className={`px-4 py-1 text-[10px] font-mono font-bold transition-all duration-200 ${
-              mode === 'sell'
-                ? 'bg-[#FF1744] text-white'
-                : 'bg-transparent text-[#A0A0A0] hover:text-white'
-            }`}
-          >
-            SELL
-          </button>
-        </div>
+        <span className="text-[10px] font-mono text-[#6B7280] uppercase tracking-wider">Market cap</span>
+        <span className="text-lg font-mono font-bold text-white tabular-nums">
+          {formatUSD(marketCap ?? 0)}
+        </span>
       </div>
 
-      {/* Balances */}
-      <div className="flex justify-between text-[10px] font-mono text-[#A0A0A0]">
-        <span>SOL: <span className="text-white tabular-nums">{solBalance.toFixed(4)}</span></span>
-        <span>{tokenSymbol}: <span className="text-white tabular-nums">{tokenBalance.toFixed(2)}</span></span>
+      {/* Buy / Sell tabs */}
+      <div className="flex rounded-lg overflow-hidden border border-[#1F1F1F]">
+        <button
+          onClick={() => { setMode('buy'); setQuote(null); setTxSignature(null); setError(null); setUsdAmount(''); setActivePreset(null); }}
+          className={`flex-1 py-2.5 text-sm font-bold transition-all duration-200 press-scale ${
+            mode === 'buy'
+              ? 'bg-[#00C853] text-[#0A0A0A]'
+              : 'bg-transparent text-[#A0A0A0] hover:text-white'
+          }`}
+        >
+          Buy
+        </button>
+        <button
+          onClick={() => { setMode('sell'); setQuote(null); setTxSignature(null); setError(null); setUsdAmount(''); setActivePreset(null); }}
+          className={`flex-1 py-2.5 text-sm font-bold transition-all duration-200 press-scale ${
+            mode === 'sell'
+              ? 'bg-[#FF1744] text-white'
+              : 'bg-transparent text-[#A0A0A0] hover:text-white'
+          }`}
+        >
+          Sell
+        </button>
       </div>
 
-      {/* Input */}
-      <div className="relative">
-        <div className="flex items-center bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] focus-within:border-[#39FF14]/40 transition-colors">
-          <div className="pl-3 flex items-center gap-1.5">
-            <span className="text-[9px] font-mono text-[#555]">{inputLabel}</span>
-          </div>
+      {/* USD Input */}
+      <div className="flex flex-col gap-2">
+        <div
+          className={`flex items-center bg-[#0A0A0A] rounded-lg border transition-colors px-3 py-3 cursor-text ${
+            inputRef.current === document.activeElement
+              ? 'border-[#39FF14]/40'
+              : 'border-[#1F1F1F]'
+          }`}
+          onClick={() => inputRef.current?.focus()}
+        >
+          <span className="text-xl font-mono font-bold text-white mr-0.5">$</span>
           <input
+            ref={inputRef}
             type="number"
-            placeholder={getPlaceholder()}
-            value={amount}
-            onChange={e => { setAmount(e.target.value); setQuote(null); setTxSignature(null); setError(null); }}
-            className="flex-1 bg-transparent px-2 py-2.5 text-white font-mono tabular-nums text-sm outline-none placeholder:text-[#333]"
+            placeholder="0"
+            value={usdAmount}
+            onChange={e => {
+              setUsdAmount(e.target.value);
+              setQuote(null);
+              setTxSignature(null);
+              setError(null);
+              setActivePreset(null);
+            }}
+            className="flex-1 bg-transparent text-xl font-mono font-bold text-white tabular-nums outline-none placeholder:text-[#333] w-0 min-w-0"
           />
-          <span className="pr-3 text-[10px] font-mono text-[#555]">{inputSuffix}</span>
-          {amount && (
+          <span className="text-xs font-mono text-[#555] ml-2 shrink-0">
+            {usdAmount ? '' : 'Enter amount'}
+          </span>
+          {usdAmount && (
             <button
-              onClick={() => { setAmount(''); setQuote(null); setError(null); }}
-              className="px-2 text-[#555] hover:text-white transition-colors text-xs"
+              onClick={(e) => { e.stopPropagation(); setUsdAmount(''); setQuote(null); setError(null); setActivePreset(null); }}
+              className="ml-1 text-[#555] hover:text-white transition-colors text-xs press-scale"
               title="Clear"
             >
               ✕
             </button>
           )}
         </div>
-        {/* Quick-fill buttons */}
-        <div className="flex gap-1.5 mt-1.5">
-          {[10, 100, 500, 1000].map(usd => (
-            <button
-              key={usd}
-              onClick={() => handleQuickFill(usd)}
-              className={`flex-1 py-1 text-[10px] font-mono font-bold rounded border transition-all ${
-                mode === 'buy'
-                  ? 'text-[#A0A0A0] bg-[#0A0A0A] border-[#1F1F1F] hover:text-[#00C853] hover:border-[#00C853]/30'
-                  : 'text-[#A0A0A0] bg-[#0A0A0A] border-[#1F1F1F] hover:text-[#FF1744] hover:border-[#FF1744]/30'
-              }`}
-            >
-              ${usd}
-            </button>
-          ))}
+
+        {/* SOL equivalent */}
+        {usdValue > 0 && mode === 'buy' && (
+          <span className="text-[10px] font-mono text-[#555] tabular-nums px-1">
+            ≈ {solEquivalent.toFixed(6)} SOL
+          </span>
+        )}
+      </div>
+
+      {/* Quick-fill buttons + Settings gear */}
+      <div className="flex items-center gap-1.5">
+        {[10, 100, 500, 1000].map(usd => (
+          <button
+            key={usd}
+            onClick={() => handleQuickFill(usd)}
+            className={`flex-1 py-1.5 text-[11px] font-mono font-bold rounded-md border transition-all press-scale ${
+              activePreset === usd
+                ? mode === 'buy'
+                  ? 'text-[#00C853] border-[#00C853]/30 bg-[#00C853]/10'
+                  : 'text-[#FF1744] border-[#FF1744]/30 bg-[#FF1744]/10'
+                : 'text-[#A0A0A0] bg-[#0A0A0A] border-[#1F1F1F] hover:text-white hover:border-[#333]'
+            }`}
+          >
+            ${usd}
+          </button>
+        ))}
+
+        {/* Settings gear */}
+        <div className="relative" ref={slippageRef}>
+          <button
+            onClick={() => setShowSlippage(!showSlippage)}
+            className="w-8 h-8 flex items-center justify-center rounded-md border border-[#1F1F1F] bg-[#0A0A0A] text-[#A0A0A0] hover:text-white hover:border-[#333] transition-colors press-scale"
+            title="Slippage settings"
+            aria-label="Slippage settings"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+          </button>
+
+          {/* Slippage popover */}
+          {showSlippage && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-[#111111] border border-[#1F1F1F] rounded-lg p-3 z-50 animate-slide-down shadow-xl">
+              <span className="text-[10px] font-mono text-[#A0A0A0] uppercase tracking-wider mb-2 block">Slippage</span>
+              <div className="flex gap-1">
+                {([0.5, 1, 3] as Slippage[]).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => { setSlippage(s); setShowSlippage(false); }}
+                    className={`flex-1 py-1.5 text-[11px] font-mono font-bold rounded-md border transition-all press-scale ${
+                      slippage === s
+                        ? 'text-[#39FF14] border-[#39FF14]/30 bg-[#39FF14]/10'
+                        : 'text-[#A0A0A0] border-[#1F1F1F] hover:text-white'
+                    }`}
+                  >
+                    {s}%
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Error display */}
-      {error && (
-        <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#FF1744]/10 border border-[#FF1744]/20 rounded-lg">
-          <span className="text-[#FF1744] text-[10px] font-mono">{error}</span>
-        </div>
-      )}
+      {/* Available balance */}
+      <button
+        onClick={handleMaxFill}
+        className="text-[11px] font-mono text-[#6B7280] hover:text-[#A0A0A0] transition-colors text-left"
+        title="Click to use max"
+      >
+        ${availableUsd.toFixed(2)} available
+      </button>
 
       {/* Quote summary */}
       {quote && (
-        <div className="flex flex-col gap-1.5 bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] px-3 py-2">
+        <div className="flex flex-col gap-1.5 bg-[#0A0A0A] rounded-lg border border-[#1F1F1F] px-3 py-2 animate-slide-in">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#A0A0A0] font-mono">You receive</span>
             <span className="text-xs font-mono font-bold text-white tabular-nums">
@@ -306,7 +411,14 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         </div>
       )}
 
-      {/* Main action button — color matches buy/sell mode */}
+      {/* Error display */}
+      {error && (
+        <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#FF1744]/10 border border-[#FF1744]/20 rounded-lg animate-slide-in">
+          <span className="text-[#FF1744] text-[10px] font-mono">{error}</span>
+        </div>
+      )}
+
+      {/* CTA Button */}
       <button
         onClick={() => {
           if (!user) { setLoginOpen(true); }
@@ -315,42 +427,66 @@ export default function SwapWidget({ tokenMint, tokenSymbol, tokenPrice }: { tok
         }}
         disabled={
           swapping ||
-          (!user ? false : !amount || parseFloat(amount) <= 0) ||
+          (!user ? false : usdValue <= 0) ||
           (quote ? impactLevel === 'high' : false) ||
           loading
         }
-        className={`w-full py-2.5 rounded-lg font-mono font-bold text-xs transition-all duration-300 ${
-          !user
-            ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A]'
-            : swapping || (quote ? impactLevel === 'high' : !amount || parseFloat(amount) <= 0)
-              ? 'bg-[#1F1F1F] text-[#555] cursor-not-allowed'
-              : mode === 'buy'
-                ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A] active:scale-[0.98]'
-                : 'bg-[#FF1744] text-white hover:bg-[#FF3D5C] active:scale-[0.98]'
+        className={`w-full py-3 rounded-lg font-bold text-sm transition-all duration-300 press-scale ${
+          showSuccess
+            ? 'bg-[#00C853] text-[#0A0A0A] animate-success-pulse'
+            : !user
+              ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A]'
+              : swapping || (quote ? impactLevel === 'high' : usdValue <= 0)
+                ? 'bg-[#1F1F1F] text-[#555] cursor-not-allowed'
+                : mode === 'buy'
+                  ? 'bg-[#00C853] text-[#0A0A0A] hover:bg-[#00E05A]'
+                  : 'bg-[#FF1744] text-white hover:bg-[#FF3D5C]'
         }`}
       >
         {swapping ? (
           <span className="flex items-center justify-center gap-2">
-            <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Swapping...
+            Swapping…
           </span>
+        ) : showSuccess ? (
+          '✓ Swap successful!'
         ) : !user ? (
           'Sign in to trade'
         ) : quote ? (
           `${mode === 'buy' ? 'Buy' : 'Sell'} ${tokenSymbol}`
         ) : (
-          `Get Quote — ${mode === 'buy' ? 'Buy' : 'Sell'} ${tokenSymbol}`
+          `Buy ${tokenSymbol}`
         )}
       </button>
 
       <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
 
+      {/* Unverified token warning */}
+      <div className="flex items-center gap-2 px-2.5 py-2 bg-[#FFA726]/5 border border-[#FFA726]/15 rounded-lg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFA726" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        <span className="text-[11px] font-mono text-[#FFA726]">Unverified token</span>
+        <button
+          className="ml-auto text-[#FFA726]/50 hover:text-[#FFA726] transition-colors"
+          title="Unverified tokens may be risky. Always do your own research."
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+        </button>
+      </div>
+
       {/* Transaction success */}
       {txSignature && (
-        <div className="flex flex-col gap-1 p-2.5 bg-[#00C853]/5 border border-[#00C853]/20 rounded-lg">
+        <div className="flex flex-col gap-1 p-2.5 bg-[#00C853]/5 border border-[#00C853]/20 rounded-lg animate-slide-in">
           <div className="flex items-center gap-1.5">
             <span className="text-[#00C853] text-xs">✓</span>
             <span className="text-[10px] font-mono text-[#00C853]">Swap successful!</span>

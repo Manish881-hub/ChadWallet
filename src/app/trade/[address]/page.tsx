@@ -1,9 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import TradeHeader from '@/components/TradeHeader';
-import TradeFooter from '@/components/TradeFooter';
-import TokenBanner from '@/components/TokenBanner';
 import ActivitySidebar from '@/components/ActivitySidebar';
 import TokenHeader from '@/components/TokenHeader';
 import TokenChart from '@/components/TokenChart';
@@ -11,6 +9,7 @@ import LiveTrades from '@/components/LiveTrades';
 import HoldersTable from '@/components/HoldersTable';
 import SwapWidget from '@/components/SwapWidget';
 import PositionPanel from '@/components/PositionPanel';
+import TokenAboutPanel from '@/components/TokenAboutPanel';
 import { TokenProvider, SidebarProvider, useSelectedToken } from '@/lib/TokenContext';
 import { fetchTokenOverview } from '@/lib/birdeye';
 
@@ -66,7 +65,6 @@ function TradePageInner() {
 
   return (
     <div className="flex flex-col h-screen bg-[#0A0A0A] text-white overflow-hidden">
-      <TokenBanner position="top" />
       <TradeHeader />
 
       <div className="flex-1 flex min-h-0">
@@ -74,99 +72,153 @@ function TradePageInner() {
         <ActivitySidebar />
 
         {/* Center — Main content */}
-        <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin min-w-0 p-2.5 pb-10 gap-2.5">
-          <TokenHeader token={selectedToken} />
-          {/* Chart */}
-          <div className="h-[280px] md:h-[340px] bg-[#111111] rounded-lg border border-[#1F1F1F] overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
+          {/* Token header */}
+          <div className="px-3 pt-2.5 pb-1">
+            <TokenHeader token={selectedToken} />
+          </div>
+
+          {/* Chart — fills available vertical space */}
+          <div className="flex-1 min-h-0 px-3 pb-1">
             <TokenChart address={selectedToken.address} />
           </div>
+
           {/* Tab section: Trades / Holders / Swaps / Thesis */}
-          <TabSection address={selectedToken.address} />
+          <div className="px-3 pb-2.5">
+            <TabSection address={selectedToken.address} />
+          </div>
         </div>
 
-        {/* Right — Position + Swap */}
-        <aside className="hidden md:flex flex-col w-[280px] min-w-[280px] border-l border-[#1F1F1F] bg-[#111111]">
+        {/* Right — Position + Swap + About */}
+        <aside className="hidden md:flex flex-col w-[320px] min-w-[320px] border-l border-[#1F1F1F] bg-[#111111] overflow-y-auto scrollbar-thin">
           <PositionPanel
             tokenMint={selectedToken.address}
             tokenSymbol={selectedToken.symbol}
             tokenPrice={selectedToken.price}
             solPrice={solPrice}
           />
-          <SwapWidget tokenMint={selectedToken.address} tokenSymbol={selectedToken.symbol} tokenPrice={selectedToken.price} />
+          <SwapWidget
+            tokenMint={selectedToken.address}
+            tokenSymbol={selectedToken.symbol}
+            tokenPrice={selectedToken.price}
+            marketCap={selectedToken.market_cap}
+          />
+          <div className="border-t border-[#1F1F1F]">
+            <TokenAboutPanel
+              tokenSymbol={selectedToken.symbol}
+              tokenName={selectedToken.name}
+              price_change_5m_percent={selectedToken.price_change_5m_percent}
+              price_change_1h_percent={selectedToken.price_change_1h_percent}
+              price_change_4h_percent={selectedToken.price_change_4h_percent}
+              price_change_24h_percent={selectedToken.price_change_24h_percent}
+              market_cap={selectedToken.market_cap}
+            />
+          </div>
         </aside>
       </div>
 
       {/* Mobile swap dock */}
-      <div className="md:hidden fixed bottom-6 inset-x-0 z-40 bg-[#111111] border-t border-[#1F1F1F] p-3 max-h-[55vh] overflow-y-auto rounded-t-lg">
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#111111] border-t border-[#1F1F1F] max-h-[60vh] overflow-y-auto rounded-t-xl">
         <PositionPanel
           tokenMint={selectedToken.address}
           tokenSymbol={selectedToken.symbol}
           tokenPrice={selectedToken.price}
           solPrice={solPrice}
         />
-        <SwapWidget tokenMint={selectedToken.address} tokenSymbol={selectedToken.symbol} tokenPrice={selectedToken.price} />
+        <SwapWidget
+          tokenMint={selectedToken.address}
+          tokenSymbol={selectedToken.symbol}
+          tokenPrice={selectedToken.price}
+          marketCap={selectedToken.market_cap}
+        />
       </div>
-
-      <TokenBanner position="bottom" />
-      <TradeFooter />
     </div>
   );
 }
 
 type ContentTab = 'Trades' | 'Holders' | 'Swaps' | 'Thesis';
-type TimeRange = '1D' | '1W' | '1M' | '3M';
 
 function TabSection({ address }: { address: string }) {
   const [tab, setTab] = useState<ContentTab>('Trades');
-  const [timeRange, setTimeRange] = useState<TimeRange>('1D');
+  const scrollPositions = useRef<Record<string, number>>({});
+  const contentRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   const CONTENT_TABS: ContentTab[] = ['Trades', 'Holders', 'Swaps', 'Thesis'];
-  const TIME_RANGES: TimeRange[] = ['1D', '1W', '1M', '3M'];
+
+  // Keyboard navigation for tabs
+  const handleTabKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const idx = CONTENT_TABS.indexOf(tab);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = CONTENT_TABS[(idx + 1) % CONTENT_TABS.length];
+      setTab(next);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = CONTENT_TABS[(idx - 1 + CONTENT_TABS.length) % CONTENT_TABS.length];
+      setTab(prev);
+    }
+  }, [tab]);
+
+  // Save scroll position when switching tabs
+  const handleTabSwitch = (newTab: ContentTab) => {
+    if (contentRef.current) {
+      scrollPositions.current[tab] = contentRef.current.scrollTop;
+    }
+    setTab(newTab);
+  };
+
+  // Restore scroll position after tab switch
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = scrollPositions.current[tab] ?? 0;
+    }
+  }, [tab]);
 
   return (
-    <div className="flex flex-col bg-[#111111] rounded-lg border border-[#1F1F1F] overflow-hidden flex-1 min-h-[200px]">
+    <div className="flex flex-col bg-[#111111] rounded-lg border border-[#1F1F1F] overflow-hidden min-h-[200px] max-h-[300px]">
       {/* Top tabs */}
-      <div className="flex items-center border-b border-[#1F1F1F]">
-        <div className="flex">
-          {CONTENT_TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider transition-colors ${
-                tab === t
-                  ? 'text-white border-b-2 border-[#39FF14]'
-                  : 'text-[#A0A0A0] hover:text-white'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-        {/* Time range selector */}
-        <div className="ml-auto flex gap-0.5 mr-1">
-          {TIME_RANGES.map((tr) => (
-            <button
-              key={tr}
-              onClick={() => setTimeRange(tr)}
-              className={`px-1.5 py-0.5 text-[9px] font-mono font-bold rounded transition-colors ${
-                timeRange === tr
-                  ? 'text-[#39FF14] bg-[#39FF14]/10'
-                  : 'text-[#555] hover:text-[#A0A0A0]'
-              }`}
-            >
-              {tr}
-            </button>
-          ))}
-        </div>
+      <div
+        className="flex items-center border-b border-[#1F1F1F]"
+        role="tablist"
+        ref={tabsRef}
+        onKeyDown={handleTabKeyDown}
+      >
+        {CONTENT_TABS.map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={tab === t}
+            tabIndex={tab === t ? 0 : -1}
+            onClick={() => handleTabSwitch(t)}
+            className={`relative px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-wider transition-colors press-scale ${
+              tab === t
+                ? 'text-white'
+                : 'text-[#6B7280] hover:text-[#A0A0A0]'
+            }`}
+          >
+            {t}
+            {/* Active tab indicator — animated slide */}
+            {tab === t && (
+              <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[#39FF14] rounded-full" />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div ref={contentRef} className="flex-1 min-h-0 overflow-y-auto scrollbar-thin">
         {tab === 'Trades' && <LiveTrades address={address} />}
         {tab === 'Holders' && <HoldersTable address={address} />}
         {tab === 'Swaps' && (
-          <div className="flex items-center justify-center h-full">
-            <span className="text-[#555] text-xs font-mono">Swap history — connect wallet to view</span>
+          <div className="flex flex-col items-center justify-center h-full py-8 gap-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="17 1 21 5 17 9" />
+              <path d="M3 11V9a4 4 0 014-4h14" />
+              <polyline points="7 23 3 19 7 15" />
+              <path d="M21 13v2a4 4 0 01-4 4H3" />
+            </svg>
+            <span className="text-[#555] text-xs font-mono">Connect wallet to view your swaps</span>
           </div>
         )}
         {tab === 'Thesis' && (
@@ -193,7 +245,7 @@ function ThesisPanel({ address }: { address: string }) {
         value={thesis}
         onChange={(e) => { setThesis(e.target.value); setSaved(false); }}
         placeholder="Write your thesis for this token... What's the catalyst? What's your entry/exit? Why this token?"
-        className="flex-1 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg p-3 text-xs font-mono text-white placeholder:text-[#333] outline-none focus:border-[#39FF14]/30 resize-none"
+        className="flex-1 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg p-3 text-xs font-mono text-white placeholder:text-[#333] outline-none focus:border-[#39FF14]/30 resize-none min-h-[100px]"
       />
       <button
         onClick={() => {
@@ -201,7 +253,7 @@ function ThesisPanel({ address }: { address: string }) {
           setSaved(true);
           setTimeout(() => setSaved(false), 2000);
         }}
-        className={`px-3 py-1.5 text-[10px] font-mono font-bold rounded-lg transition-all ${
+        className={`px-3 py-1.5 text-[10px] font-mono font-bold rounded-lg transition-all press-scale ${
           saved ? 'bg-[#00C853]/20 text-[#00C853] border border-[#00C853]/30' : 'bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/30 hover:bg-[#39FF14]/20'
         }`}
       >

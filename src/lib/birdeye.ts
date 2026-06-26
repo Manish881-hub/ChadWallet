@@ -185,6 +185,10 @@ export async function fetchOHLCV(
       return data?.data?.items ?? [];
     } catch (err: any) {
       if (err?.response?.status === 429) throw err;
+      if (err?.code === 'ECONNABORTED') {
+        logger.warn('fetchOHLCV timeout', { address, type });
+        return [];
+      }
       logger.error('fetchOHLCV failed', { address, type, error: err?.message });
       return [];
     }
@@ -200,6 +204,11 @@ export async function fetchTokenTrades(address: string, limit = 50): Promise<any
       return data?.data?.items ?? [];
     } catch (err: any) {
       if (err?.response?.status === 429) throw err;
+      // Timeouts are expected for some tokens (e.g. native SOL) — warn instead of error
+      if (err?.code === 'ECONNABORTED') {
+        logger.warn('fetchTokenTrades timeout', { address });
+        return [];
+      }
       logger.error('fetchTokenTrades failed', { address, error: err?.message });
       return [];
     }

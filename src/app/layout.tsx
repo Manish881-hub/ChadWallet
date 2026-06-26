@@ -1,14 +1,22 @@
 import type { Metadata } from 'next';
-import { Inter, Space_Mono } from 'next/font/google';
+import { Exo_2, Orbitron, Space_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 import { Providers } from '@/components/PrivyProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
 
-const inter = Inter({
+const exo2 = Exo_2({
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-body',
+});
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-display',
 });
 
 const spaceMono = Space_Mono({
@@ -30,7 +38,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceMono.variable}`}>
+    <html lang="en" className={`${exo2.variable} ${orbitron.variable} ${spaceMono.variable}`}>
       <body className="bg-dark text-white antialiased font-sans">
         <Suspense><Providers><ErrorBoundary>{children}</ErrorBoundary></Providers></Suspense>
       </body>

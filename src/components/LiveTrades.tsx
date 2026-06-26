@@ -48,8 +48,10 @@ export default function LiveTrades({ address }: LiveTradesProps) {
         setError('No trades found');
       }
     } catch (err) {
-      logger.error('Trades fetch error', { error: err });
-      setError('Failed to load trades');
+      logger.warn('Trades fetch error', { error: err });
+      if (trades.length === 0) {
+        setError('No trades available');
+      }
     } finally {
       setLoading(false);
       isLoadingRef.current = false;

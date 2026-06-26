@@ -20,35 +20,37 @@ function formatUsd(n: number): string {
 }
 
 /**
- * Shows the connected user's real on-chain position for the current token:
- * SOL balance, token balance, and their combined USD value.
- * PnL / trade history require an indexer (out of scope — no backend yet).
- * Unauthenticated → a sign-in prompt.
+ * Shows the connected user's real on-chain position for the current token.
+ * Only visible when authenticated AND has a position (token balance > 0).
+ * Compact single-section layout that integrates into the right sidebar.
  */
 export default function PositionPanel({ tokenMint, tokenSymbol, tokenPrice = 0, solPrice = 0 }: PositionPanelProps) {
   const { authenticated, user } = usePrivy();
   const [loginOpen, setLoginOpen] = useState(false);
   const { sol, token, loading } = useTokenBalances(tokenMint);
 
-  if (!authenticated) {
+  // Not authenticated — don't render (sign-in is handled by SwapWidget CTA)
+  if (!authenticated) return null;
+
+  // Loading state — show skeleton
+  if (loading) {
     return (
-      <div className="flex flex-col gap-2.5 p-3">
-        <h3 className="text-[11px] font-mono font-bold text-[#A0A0A0] uppercase tracking-wider">Position</h3>
-        <div className="flex flex-col items-center gap-2 py-3 px-3 rounded-lg border border-dashed border-[#1F1F1F] bg-[#0A0A0A]">
-          <span className="text-[10px] font-mono text-[#A0A0A0] text-center">
-            Sign in to see your balances & position
-          </span>
-          <button
-            onClick={() => setLoginOpen(true)}
-            className="mt-1 px-4 py-1.5 rounded-md bg-[#00C853] text-[#0A0A0A] text-[11px] font-mono font-bold hover:bg-[#00E05A] transition-colors"
-          >
-            Sign in
-          </button>
+      <div className="flex flex-col gap-2 p-3 border-b border-[#1F1F1F]">
+        <div className="h-3 w-16 skeleton rounded" />
+        <div className="flex justify-between">
+          <div className="h-3 w-20 skeleton rounded" />
+          <div className="h-3 w-24 skeleton rounded" />
         </div>
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
+        <div className="flex justify-between">
+          <div className="h-3 w-20 skeleton rounded" />
+          <div className="h-3 w-24 skeleton rounded" />
+        </div>
       </div>
     );
   }
+
+  // No position — don't show the panel
+  if (token <= 0 && sol <= 0) return null;
 
   const solUsd = sol * solPrice;
   const tokenUsd = token * tokenPrice;
@@ -58,8 +60,15 @@ export default function PositionPanel({ tokenMint, tokenSymbol, tokenPrice = 0, 
     <div className="flex flex-col gap-2 p-3 border-b border-[#1F1F1F]">
       <div className="flex items-center justify-between">
         <h3 className="text-[11px] font-mono font-bold text-[#A0A0A0] uppercase tracking-wider">Position</h3>
-        {loading && (
-          <div className="w-2 h-2 rounded-full bg-[#39FF14] animate-pulse" />
+        {user?.wallet?.address && (
+          <a
+            href={`https://solscan.io/account/${user.wallet.address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[9px] font-mono text-[#39FF14]/70 hover:text-[#39FF14] transition-colors tabular-nums"
+          >
+            {user.wallet.address.slice(0, 4)}…{user.wallet.address.slice(-4)} ↗
+          </a>
         )}
       </div>
 
@@ -79,32 +88,19 @@ export default function PositionPanel({ tokenMint, tokenSymbol, tokenPrice = 0, 
       </div>
 
       {/* Token row */}
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-mono text-[#A0A0A0]">{tokenSymbol}</span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono text-white tabular-nums">
-            {token >= 1 ? token.toLocaleString(undefined, { maximumFractionDigits: 2 }) : token.toFixed(4)}
-          </span>
-          <span className="text-[9px] font-mono text-[#555] tabular-nums">{formatUsd(tokenUsd)}</span>
+      {token > 0 && (
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono text-[#A0A0A0]">{tokenSymbol}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-mono text-white tabular-nums">
+              {token >= 1 ? token.toLocaleString(undefined, { maximumFractionDigits: 2 }) : token.toFixed(4)}
+            </span>
+            <span className="text-[9px] font-mono text-[#555] tabular-nums">{formatUsd(tokenUsd)}</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Wallet address */}
-      <div className="flex items-center justify-between pt-1 border-t border-[#1F1F1F]">
-        <span className="text-[9px] font-mono text-[#555]">Wallet</span>
-        {user?.wallet?.address ? (
-          <a
-            href={`https://solscan.io/account/${user.wallet.address}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[9px] font-mono text-[#39FF14]/70 hover:text-[#39FF14] transition-colors tabular-nums"
-          >
-            {user.wallet.address.slice(0, 4)}…{user.wallet.address.slice(-4)} ↗
-          </a>
-        ) : (
-          <span className="text-[9px] font-mono text-[#555]">—</span>
-        )}
-      </div>
+      <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
     </div>
   );
 }

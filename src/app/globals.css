@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
   --font-mono: var(--font-mono);
   --color-primary: #6366F1;
   --color-dark: #050816;
@@ -206,4 +207,102 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ── Stat bar fill animation ───────────────────────────────────── */
+
+@keyframes bar-fill {
+  from { width: 0%; }
+}
+.animate-bar-fill {
+  animation: bar-fill 0.8s ease-out forwards;
+}
+
+/* ── Copy button success animation ─────────────────────────────── */
+
+@keyframes copy-success {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.animate-copy-success {
+  animation: copy-success 0.4s ease-out;
+}
+
+/* ── Slide-in from right (for errors, toasts) ──────────────────── */
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slide-in-right 0.25s ease-out forwards;
+}
+
+/* ── Slide-down (for panels, popovers) ─────────────────────────── */
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-down {
+  animation: slide-down 0.2s ease-out forwards;
+}
+
+/* ── Success pulse (for CTA button after swap) ─────────────────── */
+
+@keyframes success-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 200, 83, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+}
+.animate-success-pulse {
+  animation: success-pulse 0.6s ease-out;
+}
+
+/* ── Focus ring for keyboard navigation ────────────────────────── */
+
+*:focus-visible {
+  outline: 2px solid rgba(57, 255, 20, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Button press utility ──────────────────────────────────────── */
+
+.press-scale {
+  transition: transform 0.1s ease;
+}
+.press-scale:active {
+  transform: scale(0.97);
+}
+
+/* ── Read more expand/collapse ─────────────────────────────────── */
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── No scrollbar utility ──────────────────────────────────────── */
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Number input spinner removal ──────────────────────────────── */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
