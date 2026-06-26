@@ -7,7 +7,7 @@ export default function WebAvailableSection() {
           <div className="font-mono font-bold text-[#5c67d6] tracking-widest uppercase text-[10px]">
             Now Available on Web
           </div>
-          <h2 className="text-[36px] font-bold leading-[1.05] tracking-tighter text-white text-center">
+          <h2 className="text-[36px] font-bold leading-[1.05] tracking-tighter text-white text-center font-display">
             trade from anywhere.<br />never lose a beat.
           </h2>
           <p className="tracking-tight text-[#A4A9C6] leading-relaxed text-[16px]">
@@ -36,7 +36,7 @@ export default function WebAvailableSection() {
             <div className="font-mono font-bold text-[#5c67d6] mb-4 tracking-widest uppercase text-sm">
               Now Available on Web
             </div>
-            <h2 className="text-[56px] lg:text-[72px] font-bold tracking-tighter leading-[1.05] text-white text-center">
+            <h2 className="text-[56px] lg:text-[72px] font-bold tracking-tighter leading-[1.05] text-white text-center font-display">
               trade from anywhere.<br />never lose a beat.
             </h2>
             <p className="mt-6 text-[#A4A9C6] text-[22px] tracking-tight max-w-2xl font-medium">

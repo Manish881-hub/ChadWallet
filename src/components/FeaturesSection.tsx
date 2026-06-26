@@ -100,7 +100,7 @@ export default function FeaturesSection() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-left mb-16">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] text-white">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] text-white font-display">
             never miss out again
           </h2>
           <p className="mt-2 text-xl text-[#EAEDFF99]">

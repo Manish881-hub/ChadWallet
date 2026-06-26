@@ -96,7 +96,7 @@ export default function Footer() {
                 alt={brand.name}
                 className="w-10 h-10 rounded-xl"
               />
-              <span className="text-white font-bold text-xl tracking-tight">
+              <span className="text-white font-bold text-xl tracking-tight font-display">
                 {brand.name}
               </span>
             </div>

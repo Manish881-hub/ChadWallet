@@ -23,7 +23,7 @@ export default function Header() {
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 shrink-0">
 
-        <span className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-white">
+        <span className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-white font-display">
           ChadWallet
         </span>
       </Link>

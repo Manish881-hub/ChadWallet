@@ -20,10 +20,10 @@ export default function HeroSection() {
       <div className="relative z-10 flex flex-col items-center text-center px-6 gap-5 md:gap-8">
         <div className="flex flex-col gap-2 items-center text-center w-full max-w-4xl animate-fade-up">
           {/* Giant Logo */}
-          <div className="text-[90px] sm:text-[140px] lg:text-[180px] xl:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none">
+          <div className="text-[90px] sm:text-[140px] lg:text-[180px] xl:text-[220px] font-bold leading-none tracking-tighter text-[#EAEBFF]/20 mb-2 select-none pointer-events-none font-display">
             ChadWallet
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-white">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold leading-[1.05] tracking-tight text-white font-display">
             {brand.tagline}
           </h1>
           <p className="mt-4 text-base sm:text-lg lg:text-xl text-secondary-text max-w-xl mx-auto leading-relaxed">

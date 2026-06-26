@@ -100,6 +100,7 @@ export default function CommunitySection() {
               tracking-[-0.04em]
               font-bold
               px-4
+              font-display
             "
           >
             a trading app

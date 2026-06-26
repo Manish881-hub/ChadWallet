@@ -78,7 +78,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
           {/* Logo & Text */}
           <div className="mb-8">
-            <h2 className="text-4xl font-bold text-white tracking-tighter mb-4">
+            <h2 className="text-4xl font-bold text-white tracking-tighter mb-4 font-display">
               ChadWallet
             </h2>
             <p className="text-gray-300 text-[15px] max-w-[240px] mx-auto leading-tight">
