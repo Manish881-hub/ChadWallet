@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 
 const DEFAULT_TRADE_ADDRESS = 'So11111111111111111111111111111111111111112';
@@ -17,7 +17,6 @@ const DEFAULT_TRADE_ADDRESS = 'So11111111111111111111111111111111111111112';
  * sitting on the landing page.
  */
 export default function OAuthCallbackHandler() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { ready, authenticated } = usePrivy();
@@ -35,10 +34,13 @@ export default function OAuthCallbackHandler() {
 
     // Case 1: OAuth callback — URL has privy_oauth_state param
     // Case 2: User is already logged in but landed on "/"
-    // In both cases, send them to the trade page
+    // In both cases, send them to the trade page.
+    // Use window.location.href instead of router.replace because Next.js
+    // client-side navigation can be unreliable immediately after an OAuth
+    // redirect (Privy may still be settling session state).
     hasRedirected.current = true;
-    router.replace(`/trade/${DEFAULT_TRADE_ADDRESS}`);
-  }, [ready, authenticated, pathname, searchParams, router]);
+    window.location.href = `/trade/${DEFAULT_TRADE_ADDRESS}`;
+  }, [ready, authenticated, pathname, searchParams]);
 
   return null;
 }

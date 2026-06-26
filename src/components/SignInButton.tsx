@@ -7,6 +7,11 @@ export default function SignInButton() {
   const { logout, authenticated, user } = usePrivy();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
+  };
+
   if (authenticated) {
     return (
       <div className="flex items-center gap-3">
@@ -16,7 +21,7 @@ export default function SignInButton() {
             : 'Connected'}
         </span>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="bg-white/10 hover:bg-white/20 ring-1 ring-white/20 h-10 px-5 rounded-md font-medium text-sm transition-colors"
         >
           Sign Out
