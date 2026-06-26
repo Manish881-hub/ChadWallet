@@ -138,22 +138,25 @@ export default function TradeHeader() {
 
         {/* Right — Cash card + Portfolio + Avatar */}
         <div className="flex items-center gap-2 shrink-0">
-          {authenticated && (
-            <div className="flex items-center gap-2 bg-[#111111] border border-[#1F1F1F] rounded-md px-2.5 py-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-mono font-bold text-white tabular-nums">$0.00</span>
-                <span className="text-[9px] font-mono text-[#A0A0A0]">cash</span>
+          {authenticated && (() => {
+            const solUsd = sol * solPrice;
+            return (
+              <div className="flex items-center gap-2 bg-[#111111] border border-[#1F1F1F] rounded-md px-2.5 py-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold text-white tabular-nums">{formatUsd(solUsd)}</span>
+                  <span className="text-[9px] font-mono text-[#A0A0A0]">cash</span>
+                </div>
+                <div className="w-px h-3 bg-[#1F1F1F]" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold text-white tabular-nums">{sol.toFixed(3)} SOL</span>
+                  <span className="text-[9px] font-mono text-[#A0A0A0]">balance</span>
+                </div>
+                <button className="text-[9px] font-mono font-bold text-[#39FF14] hover:text-[#39FF14]/80 transition-colors ml-0.5" title="Fund wallet">
+                  +
+                </button>
               </div>
-              <div className="w-px h-3 bg-[#1F1F1F]" />
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-mono font-bold text-white tabular-nums">$0.00</span>
-                <span className="text-[9px] font-mono text-[#A0A0A0]">portfolio</span>
-              </div>
-              <button className="text-[9px] font-mono font-bold text-[#39FF14] hover:text-[#39FF14]/80 transition-colors ml-0.5">
-                +
-              </button>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Avatar / Sign in */}
           <div className="w-7 h-7 rounded-full bg-[#111111] border border-[#1F1F1F] flex items-center justify-center overflow-hidden">
@@ -177,4 +180,11 @@ function formatPrice(price?: number): string {
   if (price >= 0.01) return '$' + price.toFixed(4);
   if (price >= 0.0001) return '$' + price.toFixed(6);
   return '$' + price.toPrecision(2);
+}
+
+function formatUsd(n: number): string {
+  if (!n || n <= 0) return '$0.00';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(2)}K`;
+  return `$${n.toFixed(2)}`;
 }
