@@ -1,105 +1,118 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getTokenHolders, type TokenHolder } from '@/lib/solana';
 
-type Tab = 'Holders' | 'Swaps' | 'Thesis';
+function shortAddr(addr: string): string {
+  if (!addr) return '—';
+  return `${addr.slice(0, 4)}…${addr.slice(-4)}`;
+}
 
-const MOCK_HOLDERS = [
-  { name: 'mesna', avatar: 'M', avgHold: '2d 12h', position: '$43,329.20', tokens: '14.6k FLKR', pnl: '+$32,588.97', pnlPct: '+303.43%', up: true, avgEntry: '$0.00012', thesis: '10 days till moon, diamond hands only 💎 [Link]' },
-  { name: 'beam.me_up', avatar: 'B', avgHold: '5d 8h', position: '$12,450.00', tokens: '2.5B MOON', pnl: '+$8,200.50', pnlPct: '+193.12%', up: true, avgEntry: '$0.00005', thesis: 'Community is strong, devs are doxxed 🚀' },
-  { name: 'diamond.hands', avatar: 'D', avgHold: '12d 3h', position: '$89,212.40', tokens: '7.4B PEPE', pnl: '+$45,100.00', pnlPct: '+102.34%', up: true, avgEntry: '$0.00009', thesis: 'Accumulating through the dip, target 10x [Link]' },
-  { name: 'rekt.trader', avatar: 'R', avgHold: '1d 6h', position: '$5,200.00', tokens: '35M BONK', pnl: '-$2,300.00', pnlPct: '-30.67%', up: false, avgEntry: '$0.00035', thesis: 'Paper hands, should have held longer' },
-  { name: 'whal3.watcher', avatar: 'W', avgHold: '8d 1h', position: '$234,000.00', tokens: '980M SHIB', pnl: '+$89,200.00', pnlPct: '+61.54%', up: true, avgEntry: '$0.00021', thesis: 'Whale accumulation pattern detected 📈 [Link]' },
+function formatAmount(n: number): string {
+  if (!n) return '0';
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`;
+  return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+const AVATAR_COLORS = [
+  'from-[#39FF14]/30 to-[#00C853]/30',
+  'from-[#FF1744]/30 to-[#FF6B35]/30',
+  'from-[#6366F1]/30 to-[#8B5CF6]/30',
+  'from-[#F59E0B]/30 to-[#EAB308]/30',
+  'from-[#06B6D4]/30 to-[#3B82F6]/30',
+  'from-[#EC4899]/30 to-[#F43F5E]/30',
+  'from-[#10B981]/30 to-[#14B8A6]/30',
+  'from-[#F97316]/30 to-[#EF4444]/30',
 ];
 
-export default function HoldersTable() {
-  const [tab, setTab] = useState<Tab>('Holders');
+export default function HoldersTable({ address }: { address: string }) {
+  const [holders, setHolders] = useState<TokenHolder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getTokenHolders(address, 20)
+      .then((data) => {
+        if (cancelled) return;
+        setHolders(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError('Failed to load holders');
+        setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [address]);
 
   return (
-    <div className="flex flex-col bg-[#12121B] rounded-xl border border-[rgba(255,255,255,.05)] overflow-hidden">
-      {/* Tabs */}
-      <div className="flex border-b border-[rgba(255,255,255,.05)]">
-        {(['Holders', 'Swaps', 'Thesis'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2.5 text-xs font-mono font-bold tracking-wider uppercase transition-colors ${
-              tab === t
-                ? 'text-white border-b-2 border-[#39FF14]'
-                : 'text-[#6B7280] hover:text-[#A0A0A0]'
-            }`}
-          >
-            {t}
-          </button>
-        ))}
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Column headers */}
+      <div className="grid grid-cols-[2fr_1.4fr_1fr] gap-2 px-2.5 py-1.5 border-b border-[#1F1F1F] sticky top-0 bg-[#111111] z-10">
+        <span className="text-[#555] font-medium uppercase tracking-wider text-[9px] font-mono">Token Account</span>
+        <span className="text-right text-[#555] font-medium uppercase tracking-wider text-[9px] font-mono">Amount</span>
+        <span className="text-right text-[#555] font-medium uppercase tracking-wider text-[9px] font-mono">% Supply</span>
       </div>
 
-      {/* Content */}
-      {tab === 'Holders' && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs font-mono">
-            <thead>
-              <tr className="border-b border-[rgba(255,255,255,.05)]">
-                <th className="text-left px-4 py-2.5 text-[#6B7280] font-medium uppercase tracking-wider">Trader</th>
-                <th className="text-right px-4 py-2.5 text-[#6B7280] font-medium uppercase tracking-wider">Position</th>
-                <th className="text-right px-4 py-2.5 text-[#6B7280] font-medium uppercase tracking-wider">PnL</th>
-                <th className="text-right px-4 py-2.5 text-[#6B7280] font-medium uppercase tracking-wider">Avg Entry</th>
-                <th className="text-left px-4 py-2.5 text-[#6B7280] font-medium uppercase tracking-wider">Thesis</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_HOLDERS.map((h, i) => (
-                <tr key={i} className="border-b border-[rgba(255,255,255,.03)] hover:bg-white/[.02] transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-[#1F2937] shrink-0 flex items-center justify-center text-[10px] font-bold text-[#6B7280]">
-                        {h.avatar}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-white font-bold">{h.name}</span>
-                        <span className="text-[9px] text-[#6B7280] font-mono">{h.avgHold} avg. hold</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex flex-col">
-                      <span className="text-xs text-white tabular-nums font-bold">{h.position}</span>
-                      <span className="text-[9px] text-[#6B7280] tabular-nums">{h.tokens}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex flex-col">
-                      <span className={`text-xs tabular-nums font-bold ${h.up ? 'text-[#00C853]' : 'text-[#FF1744]'}`}>{h.pnl}</span>
-                      <span className={`text-[9px] tabular-nums ${h.up ? 'text-[#00C853]/70' : 'text-[#FF1744]/70'}`}>{h.pnlPct}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right text-[#A0A0A0] tabular-nums">{h.avgEntry}</td>
-                  <td className="px-4 py-3 max-w-[160px]">
-                    <div className="flex items-start gap-1">
-                      <svg className="w-3 h-3 shrink-0 mt-0.5 text-[#6B7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
-                      </svg>
-                      <span className="text-[10px] text-[#A0A0A0] leading-tight truncate">{h.thesis}</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0">
+        {loading && (
+          <div className="flex flex-col">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="grid grid-cols-[2fr_1.4fr_1fr] gap-2 px-2.5 py-2.5 border-b border-[#1F1F1F]/40">
+                <div className="h-3 rounded skeleton" />
+                <div className="h-3 rounded skeleton justify-self-end w-20" />
+                <div className="h-3 rounded skeleton justify-self-end w-10" />
+              </div>
+            ))}
+          </div>
+        )}
 
-      {tab === 'Swaps' && (
-        <div className="flex items-center justify-center h-24 text-xs text-[#6B7280] font-mono">
-          Swap history coming soon
-        </div>
-      )}
+        {!loading && error && (
+          <div className="flex items-center justify-center h-24 px-4">
+            <span className="text-[#A0A0A0] text-[11px] font-mono text-center">{error}</span>
+          </div>
+        )}
 
-      {tab === 'Thesis' && (
-        <div className="flex items-center justify-center h-24 text-xs text-[#6B7280] font-mono">
-          Community thesis coming soon
-        </div>
-      )}
+        {!loading && !error && holders.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-24 gap-1 px-4 text-center">
+            <span className="text-[#A0A0A0] text-[11px] font-mono">No holder data available</span>
+            <span className="text-[#555] text-[10px] font-mono">Native mints (e.g. SOL) don't report SPL holders</span>
+          </div>
+        )}
+
+        {!loading && !error && holders.map((h, i) => (
+          <div
+            key={h.address}
+            className="grid grid-cols-[2fr_1.4fr_1fr] gap-2 px-2.5 py-2 border-b border-[#1F1F1F]/40 hover:bg-white/[.02] transition-colors"
+          >
+            <a
+              href={`https://solscan.io/account/${h.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 min-w-0 hover:text-[#39FF14] transition-colors"
+            >
+              <div className={`w-5 h-5 rounded-full bg-gradient-to-br ${AVATAR_COLORS[i % AVATAR_COLORS.length]} flex items-center justify-center text-[8px] font-bold text-white shrink-0`}>
+                {i + 1}
+              </div>
+              <span className="text-[10px] text-white font-mono truncate">{shortAddr(h.address)}</span>
+            </a>
+            <span className="px-1 py-0.5 text-right text-[10px] text-white tabular-nums font-bold font-mono">
+              {formatAmount(h.amount)}
+            </span>
+            <span className="px-1 py-0.5 text-right text-[10px] text-[#A0A0A0] tabular-nums font-mono">
+              {h.percentage.toFixed(2)}%
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
