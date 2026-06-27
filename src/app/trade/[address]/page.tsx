@@ -103,7 +103,11 @@ function TradePageInner() {
 
           {/* Chart — fills available vertical space */}
           <div className="flex-1 min-h-0 px-3 pb-1">
-            <TokenChart address={selectedToken.address} />
+            <TokenChart
+              address={selectedToken.address}
+              tokenSymbol={selectedToken.symbol}
+              tokenName={selectedToken.name}
+            />
           </div>
 
           {/* Tab section: Trades / Holders / Swaps / Thesis */}
