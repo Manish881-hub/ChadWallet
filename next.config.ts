@@ -40,17 +40,29 @@ const securityHeaders = [
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // HSTS — enforce HTTPS for 1 year, include subdomains, allow preload list
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=31536000; includeSubDomains; preload',
+  },
+  // Restrict browser features the app doesn't need
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  },
   {
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.privy.io https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.privy.io https://js.stripe.com https://s3.tradingview.com https://s.tradingview.com https://tv-static-images.tradingview.com https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://s3.tradingview.com https://s.tradingview.com",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.birdeye.so https://*.alchemy.com https://*.jup.ag https://*.privy.io https://api.privy.io wss://*.privy.io https://solana-mainnet.g.alchemy.com https://explorer-api.walletconnect.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org",
-      "frame-src 'self' https://*.privy.io https://verify.walletconnect.com https://verify.walletconnect.org",
+      "font-src 'self' data: https://s3.tradingview.com https://s.tradingview.com",
+      "connect-src 'self' https://*.birdeye.so https://*.alchemy.com https://*.jup.ag https://*.privy.io https://api.privy.io wss://*.privy.io https://solana-mainnet.g.alchemy.com https://explorer-api.walletconnect.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://api.coingecko.com https://*.tradingview.com wss://*.tradingview.com https://scanner.tradingview.com",
+      "frame-src 'self' https://*.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://s.tradingview.com https://*.tradingview.com",
+      "child-src 'self' blob: https://s.tradingview.com https://*.tradingview.com",
       "frame-ancestors 'self'",
+      "worker-src 'self' blob:",
     ].join('; '),
   },
 ];
@@ -60,21 +72,59 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
   generateEtags: true,
+  turbopack: {},
   webpack: (config) => {
     // Redirect the broken react-aria/* subpath imports to their real .js files.
     config.resolve = config.resolve || {};
-    config.resolve.alias = { ...(config.resolve.alias || {}), ...reactAriaAliases };
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      ...reactAriaAliases,
+      // @floating-ui/dom@1.7.6 ESM entry re-exports getOverflowAncestors from
+      // @floating-ui/utils/dom, but webpack can't trace the indirect re-export.
+      // The browser-bundled entry has the function inlined and exports it directly.
+      '@floating-ui/dom': path.join(
+        process.cwd(), 'node_modules', '@floating-ui', 'dom', 'dist',
+        'floating-ui.dom.browser.mjs',
+      ),
+      // @reown/appkit-controllers imports W3mFrameRpcConstants from
+      // @reown/appkit-wallet/utils, but it was removed in a breaking update.
+      // These are internal WalletConnect components never used by our app.
+      '@reown/appkit-wallet/utils': path.join(process.cwd(), 'empty-module.js'),
+    };
 
-    // @privy-io/react-auth v3.32 does a dynamic import("@farcaster/mini-app-solana")
-    // inside a try/catch — it's optional and only used in Farcaster Mini Apps.
-    // Webpack still statically resolves it and fails, so we tell it to ignore it.
+    // Stub out broken @solana-program/* transitive imports that reference
+    // @solana/kit subpaths not present in v5.
+    config.resolve.fallback = {
+      ...(config.resolve.fallback || {}),
+      '@solana-program/system': false,
+      '@solana-program/token': false,
+      '@solana-program/token-2022': false,
+      '@solana-program/memo': false,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const webpack = require('webpack');
     config.plugins = config.plugins || [];
+
+    // @privy-io/react-auth does optional dynamic imports for packages we don't use.
     config.plugins.push(
       new webpack.IgnorePlugin({
         resourceRegExp: /^@farcaster\/mini-app-solana$/,
-      })
+      }),
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^@stripe\/crypto$/,
+      }),
     );
+
+    // Suppress warnings from @solana-program/* and @reown/* broken imports.
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      { message: /SOLANA_ERROR__PROGRAM_CLIENTS/ },
+      { message: /program-client-core/ },
+      { message: /Can't resolve '@solana-program/ },
+      { message: /W3mFrameRpcConstants/ },
+      { message: /@reown\/appkit/ },
+    ];
 
     return config;
   },
