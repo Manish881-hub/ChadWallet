@@ -67,6 +67,7 @@ export default function CommunitySection() {
               w-[90vw]
               sm:w-[55vw]
               max-w-[300px]
+              h-auto
               sm:max-w-[320px]
               md:max-w-[460px]
               lg:max-w-[650px]

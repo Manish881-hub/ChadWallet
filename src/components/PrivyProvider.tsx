@@ -14,6 +14,9 @@ export function Providers({
       clientId={process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID}
       config={{
         loginMethods: ['google', 'apple'],
+        appearance: {
+          walletChainType: 'solana-only',
+        },
         embeddedWallets: {
           solana: {
             createOnLogin: 'users-without-wallets',

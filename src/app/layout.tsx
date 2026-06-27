@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Space_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 import { Providers } from '@/components/PrivyProvider';
+import { ProfileProvider } from '@/lib/ProfileContext';
 import { ToastProvider } from '@/components/ToastProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import './globals.css';
@@ -24,6 +25,11 @@ const APP_NAME = 'ChadWallet';
 const APP_DESCRIPTION = 'From memecoins to viral tokens, trade any crypto in seconds.';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : 'https://chadwallet-fomo.vercel.app'
+  ),
   title: {
     default: `${APP_NAME} — Solana, all in one app`,
     template: `%s | ${APP_NAME}`,
@@ -54,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${spaceMono.variable}`}>
       <body className="bg-dark text-white antialiased font-sans">
-        <Suspense><Providers><ToastProvider><ErrorBoundary>{children}</ErrorBoundary></ToastProvider></Providers></Suspense>
+        <Suspense><Providers><ProfileProvider><ToastProvider><ErrorBoundary>{children}</ErrorBoundary></ToastProvider></ProfileProvider></Providers></Suspense>
       </body>
     </html>
   );

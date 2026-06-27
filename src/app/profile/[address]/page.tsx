@@ -1,7 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
 import { SidebarProvider, TokenProvider } from '@/lib/TokenContext';
-import { ProfileProvider } from '@/lib/ProfileContext';
 import TradeHeader from '@/components/TradeHeader';
 import ActivitySidebar from '@/components/ActivitySidebar';
 import FollowSidebar from '@/components/FollowSidebar';
@@ -13,7 +12,6 @@ export default function ProfilePage() {
 
   return (
     <TokenProvider>
-      <ProfileProvider>
         <SidebarProvider>
           <div className="flex flex-col h-screen bg-[#0A0A0A] text-white overflow-hidden">
             <TradeHeader />
@@ -24,7 +22,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </SidebarProvider>
-      </ProfileProvider>
     </TokenProvider>
   );
 }

@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import TokenBanner from '@/components/TokenBanner';
+import TickerBar from '@/components/TickerBar';
 import WebAvailableSection from '@/components/WebAvailableSection';
 import DeviceShowcaseSection from '@/components/DeviceShowcaseSection';
 import FeaturesSection from '@/components/FeaturesSection';
@@ -10,10 +11,14 @@ import Footer from '@/components/Footer';
 export default function Home() {
   return (
     <main>
-      <Header />
-
       {/* ── Shared aurora band: all content sections ──────────────────── */}
       <div className="relative">
+        <div className="absolute top-0 left-0 w-full z-50">
+          <TokenBanner position="top" />
+        </div>
+        <div className="absolute top-9 left-0 w-full z-50">
+          <Header />
+        </div>
         {/* Aurora background — spans the full height of all sections */}
         <div
           aria-hidden="true"
@@ -34,11 +39,13 @@ export default function Home() {
         <HeroSection />
         <WebAvailableSection />
         <DeviceShowcaseSection />
+
         <FeaturesSection />
         <CommunitySection />
       </div>
 
       <Footer />
+      <TokenBanner position="bottom" />
     </main>
   );
 }

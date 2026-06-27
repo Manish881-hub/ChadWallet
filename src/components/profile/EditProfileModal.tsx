@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useProfile, ProfileState } from '@/lib/ProfileContext';
 import { useToast } from '@/components/ToastProvider';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,28 +12,51 @@ interface EditProfileModalProps {
 export default function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
   const { profile, updateProfile } = useProfile();
   const { addToast } = useToast();
-  
-  const [formData, setFormData] = useState<Partial<ProfileState>>({});
-
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        username: profile.username,
-        bio: profile.bio,
-        twitter: profile.twitter,
-        website: profile.website,
-        avatar: profile.avatar,
-        banner: profile.banner
-      });
-    }
-  }, [isOpen, profile]);
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
-    updateProfile(formData);
-    addToast('Profile updated', 'success');
-    onClose();
+  return (
+    <EditProfileForm
+      addToast={addToast}
+      onClose={onClose}
+      profile={profile}
+      updateProfile={updateProfile}
+    />
+  );
+}
+
+function profileToFormData(profile: ProfileState): Partial<ProfileState> {
+  return {
+    username: profile.username,
+    bio: profile.bio,
+    twitter: profile.twitter,
+    website: profile.website,
+    avatar: profile.avatar,
+    banner: profile.banner,
+  };
+}
+
+function EditProfileForm({
+  addToast,
+  onClose,
+  profile,
+  updateProfile,
+}: {
+  addToast: (message: string, type: 'success' | 'error' | 'info') => void;
+  onClose: () => void;
+  profile: ProfileState;
+  updateProfile: (updates: Partial<ProfileState>) => Promise<void>;
+}) {
+  const [formData, setFormData] = useState<Partial<ProfileState>>(() => profileToFormData(profile));
+
+  const handleSave = async () => {
+    try {
+      await updateProfile(formData);
+      addToast('Profile updated', 'success');
+      onClose();
+    } catch {
+      addToast('Profile saved locally', 'error');
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'avatar' | 'banner') => {

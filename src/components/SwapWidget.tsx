@@ -1,13 +1,12 @@
 'use client';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { Connection, PublicKey, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, VersionedTransaction } from '@solana/web3.js';
 import { createJupiterApiClient } from '@jup-ag/api';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchTokenOverview } from '@/lib/birdeye';
+import { connection } from '@/lib/solana';
 import { logger } from '@/lib/logger';
 import LoginModal from './LoginModal';
-
-const connection = new Connection(process.env.NEXT_PUBLIC_ALCHEMY_RPC!);
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
 const jupiterApi = createJupiterApiClient();
 

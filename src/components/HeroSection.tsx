@@ -4,7 +4,7 @@ import { brand } from '@/lib/brand';
 
 export default function HeroSection() {
   return (
-    <section className="relative flex flex-col items-center justify-center w-full pt-10 md:pt-20">
+    <section className="relative flex flex-col items-center justify-center w-full pt-28 md:pt-32">
       <img
         alt=""
         aria-hidden="true"
